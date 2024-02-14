@@ -15,45 +15,7 @@ app.post('/api/grid', (req, res) => {
   const { size } = req.body;
   const matrix = createAdjacencyMatrix(size);
   const { nodes, links } = createNodesandEdges(matrix);
-
-  const { document } = (new JSDOM(`<!DOCTYPE html><body></body>`)).window;
-  global.document = document;
-
-  const svg = d3.select(document.body).append("svg")
-                .attr("xmlns", "http://www.w3.org/2000/svg")
-                .attr("width", 750)
-                .attr("height", 750);
-
-  // Calculate node positions based on the grid size
-  const gap = (700 - 2 * 30) / (size + 1); // Adjust gap to account for offset
-  nodes.forEach(node => {
-    node.x = (node.id % size) * gap + 30; // Add the offset here
-    node.y = Math.floor(node.id / size) * gap + 30; // And here
-  });
-
-  // Draw lines for links first so they appear behind the circles
-  svg.selectAll("line")
-     .data(links)
-     .enter()
-     .append("line")
-     .attr("x1", d => nodes[d.source].x)
-     .attr("y1", d => nodes[d.source].y)
-     .attr("x2", d => nodes[d.target].x)
-     .attr("y2", d => nodes[d.target].y)
-     .attr("stroke", "black");
-
-  // Draw circles for nodes
-  svg.selectAll("circle")
-     .data(nodes)
-     .enter()
-     .append("circle")
-     .attr("cx", d => d.x ) // Offset by one gap to center
-     .attr("cy", d => d.y ) // Offset by one gap to center
-     .attr("r", 10)
-     .attr("fill", "black");
-
-  // Send SVG as a string
-  res.send(document.body.innerHTML);
+  res.send({size,matrix,nodes,links});
 });
 
 
@@ -102,3 +64,44 @@ function createNodesandEdges(matrix){
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+
+  // const { document } = (new JSDOM(`<!DOCTYPE html><body></body>`)).window;
+  // global.document = document;
+
+  // const svg = d3.select(document.body).append("svg")
+  //               .attr("xmlns", "http://www.w3.org/2000/svg")
+  //               .attr("width", 750)
+  //               .attr("height", 750);
+
+  // // Calculate node positions based on the grid size
+  // const gap = (700 - 2 * 30) / (size + 1); // Adjust gap to account for offset
+  // nodes.forEach(node => {
+  //   node.x = (node.id % size) * gap + 30; // Add the offset here
+  //   node.y = Math.floor(node.id / size) * gap + 30; // And here
+  // });
+
+  // // Draw lines for links first so they appear behind the circles
+  // svg.selectAll("line")
+  //    .data(links)
+  //    .enter()
+  //    .append("line")
+  //    .attr("x1", d => nodes[d.source].x)
+  //    .attr("y1", d => nodes[d.source].y)
+  //    .attr("x2", d => nodes[d.target].x)
+  //    .attr("y2", d => nodes[d.target].y)
+  //    .attr("stroke", "black")
+  //    .attr("class", "edge");
+
+  // // Draw circles for nodes
+  // svg.selectAll("circle")
+  //    .data(nodes)
+  //    .enter()
+  //    .append("circle")
+  //    .attr("cx", d => d.x ) // Offset by one gap to center
+  //    .attr("cy", d => d.y ) // Offset by one gap to center
+  //    .attr("r", 10)
+  //    .attr("fill", "black")
+  //    .attr("class", "node");
+
+  // // Send SVG as a string

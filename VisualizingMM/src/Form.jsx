@@ -1,22 +1,18 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import GridComponent from './GridComponent'; // Make sure the path is correct
 
-
-// This will be The Form That User uses to submit For a Grid
 const serverUrl = import.meta.env.VITE_REACT_APP_SERVER_URL;
-
-
 
 const GridSizeForm = () => {
   const [size, setSize] = useState('');
-  const [svgContent, setSvgContent] = useState('');
+  const [gridData, setGridData] = useState(null); // State to store the response data
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(`${serverUrl}/api/grid`, { size: parseInt(size, 10) });
-      // Assuming the server sends back SVG content directly
-      setSvgContent(response.data); // Update state with SVG content
+      setGridData(response.data); // Set the grid data which will be used by the GridComponent
     } catch (error) {
       console.error('Error creating grid:', error);
     }
@@ -36,11 +32,15 @@ const GridSizeForm = () => {
         </label>
         <button type="submit">Create Grid</button>
       </form>
-      {/* Conditionally render the SVG content */}
-      {svgContent && <div dangerouslySetInnerHTML={{ __html: svgContent }} />}
+      {gridData && (
+        <GridComponent
+          size={gridData.size} // Ensure these match the data structure sent by the server
+          nodes={gridData.nodes}
+          links={gridData.links}
+        />
+      )}
     </div>
   );
-  
 };
 
 export default GridSizeForm;
