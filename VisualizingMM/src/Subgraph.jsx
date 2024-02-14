@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-//This is the Grid Component.
-//Takes in the data from the endpoint and uses d3 to create a grid enclosed in an svg
-const GridComponent = ({ size, nodes, links }) => {
+//This is the Subgraph Component.
+//Takes in the data from the endpoint and uses d3 to create a subgraph enclosed in an svg
+//This component is explicitly used for Selecting the Subgraphs
+//Idea being when the particular edges are clicked color changes
+//Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
+const SubgraphComponent = ({ size, nodes, links }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -44,7 +47,9 @@ const GridComponent = ({ size, nodes, links }) => {
         .attr("class", "edge")
         .on("click", function(event, d) {
             // Handle click event on nodes
-            console.log("Edge clicked", d);
+            const currentColor = d3.select(this).attr("stroke");
+            const newColor = currentColor === "black" ? "red" : "black"; // Change "red" to your preferred color
+            d3.select(this).attr("stroke", newColor);
           });
 
       // Draw the nodes (circles)
@@ -59,7 +64,9 @@ const GridComponent = ({ size, nodes, links }) => {
         .attr("class", "node")
         .on("click", function(event, d) {
           // Handle click event on nodes
-          console.log("Node clicked", d);
+          const currentColor = d3.select(this).attr("fill");
+          const newColor = currentColor === "black" ? "red" : "black"; // Change "red" to your preferred color
+          d3.select(this).attr("fill", newColor);
         });
 
     }
@@ -70,4 +77,4 @@ const GridComponent = ({ size, nodes, links }) => {
   );
 };
 
-export default GridComponent;
+export default SubgraphComponent;
