@@ -42,10 +42,7 @@ const GridComponent = ({ size, nodes, links }) => {
         .attr("stroke", "black")
         .attr("stroke-width", 3)
         .attr("class", "edge")
-        .on("click", function(event, d) {
-            // Handle click event on nodes
-            console.log("Edge clicked", d);
-          });
+
 
       // Draw the nodes (circles)
       svg.selectAll(".node")
@@ -57,10 +54,7 @@ const GridComponent = ({ size, nodes, links }) => {
         .attr("r", 12)
         .attr("fill", "black")
         .attr("class", "node")
-        .on("click", function(event, d) {
-          // Handle click event on nodes
-          console.log("Node clicked", d);
-        });
+
 
     }
   }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes

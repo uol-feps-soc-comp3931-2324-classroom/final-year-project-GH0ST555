@@ -46,9 +46,9 @@ const SubgraphComponent = ({ size, nodes, links }) => {
         .attr("stroke-width", 3)
         .attr("class", "edge")
         .on("click", function(event, d) {
-            // Handle click event on nodes
+            // Handle click event on edges
             const currentColor = d3.select(this).attr("stroke");
-            const newColor = currentColor === "black" ? "red" : "black"; // Change "red" to your preferred color
+            const newColor = currentColor === "black" ? "red" : "black";
             d3.select(this).attr("stroke", newColor);
           });
 
@@ -65,7 +65,7 @@ const SubgraphComponent = ({ size, nodes, links }) => {
         .on("click", function(event, d) {
           // Handle click event on nodes
           const currentColor = d3.select(this).attr("fill");
-          const newColor = currentColor === "black" ? "red" : "black"; // Change "red" to your preferred color
+          const newColor = currentColor === "black" ? "red" : "black";
           d3.select(this).attr("fill", newColor);
         });
 
