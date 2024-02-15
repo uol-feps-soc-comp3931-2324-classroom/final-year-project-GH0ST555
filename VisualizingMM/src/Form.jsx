@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import GridComponent from './GridComponent';
 import Popup from 'reactjs-popup';
@@ -21,15 +21,31 @@ const GridSizeForm = () => {
   const  [generateSG, setGenerateSG] = useState(false);
 
   const onNodeSelect = (node) => {
-    const isSelected = selectedNodes.includes(node.id);
-    setSelectedNodes(isSelected ? selectedNodes.filter(id => id !== node.id) : [...selectedNodes, node.id]);
+    setSelectedNodes(prevSelectedNodes => {
+      const isSelected = prevSelectedNodes.includes(node.id);
+      if (isSelected) {
+        // If already selected, remove it from the selection
+        return prevSelectedNodes.filter(id => id !== node.id);
+      } else {
+        // If not selected, add it to the selection
+        return [...prevSelectedNodes, node.id];
+      }
+    });
   };
-
+  
   const onLinkSelect = (link) => {
-    const linkId = link.id;
-    const isSelected = selectedLinks.includes(linkId);
-    setSelectedLinks(isSelected ? selectedLinks.filter(id => id !== linkId) : [...selectedLinks, linkId]);
+    setSelectedLinks(prevSelectedLinks => {
+      const isSelected = prevSelectedLinks.some(selectedLink => selectedLink.id === link.id);
+      if (isSelected) {
+        // If already selected, remove it from the selection
+        return prevSelectedLinks.filter(selectedLink => selectedLink.id !== link.id);
+      } else {
+        // If not selected, add it to the selection
+        return [...prevSelectedLinks, link];
+      }
+    });
   };
+  
 
 
 

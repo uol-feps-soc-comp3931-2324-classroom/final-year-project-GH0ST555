@@ -31,7 +31,7 @@ const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) 
       // Draw the links (lines)
       //added a class attribte and event handler for clicking to identify edge was clicked
       svg.selectAll(".edge")
-        .data(links, d => d.id)
+        .data(links)
         .enter()
         .append("line")
         .attr("x1", d => nodes[d.source].x)
@@ -42,7 +42,10 @@ const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) 
         .attr("stroke-width", 3)
         .attr("id", d => d.id)
         .attr("class", "edge")
-        .attr("opacity", d => selectedLinks.includes(d.id) ? 1 : 0);
+        .attr("opacity", d => selectedLinks.some(link => link.source === d.source && link.target === d.target) ? 1 : 0); //id as an identifier did not work
+
+
+          
 
 
       // Draw the nodes (circles)
