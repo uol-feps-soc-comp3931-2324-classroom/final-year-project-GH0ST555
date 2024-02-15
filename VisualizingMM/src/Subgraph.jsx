@@ -1,12 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-//This is the Subgraph Component.
-//Takes in the data from the endpoint and uses d3 to create a subgraph enclosed in an svg
-//This component is explicitly used for Selecting the Subgraphs
-//Idea being when the particular edges are clicked color changes
-//Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
-const SubgraphComponent = ({ size, nodes, links }) => {
+
+const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -35,7 +31,7 @@ const SubgraphComponent = ({ size, nodes, links }) => {
       // Draw the links (lines)
       //added a class attribte and event handler for clicking to identify edge was clicked
       svg.selectAll(".edge")
-        .data(links)
+        .data(links, d => d.id)
         .enter()
         .append("line")
         .attr("x1", d => nodes[d.source].x)
@@ -44,13 +40,10 @@ const SubgraphComponent = ({ size, nodes, links }) => {
         .attr("y2", d => nodes[d.target].y)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
+        .attr("id", d => d.id)
         .attr("class", "edge")
-        .on("click", function(event, d) {
-            // Handle click event on edges
-            const currentColor = d3.select(this).attr("stroke");
-            const newColor = currentColor === "black" ? "red" : "black";
-            d3.select(this).attr("stroke", newColor);
-          });
+        .attr("opacity", d => selectedLinks.includes(d.id) ? 1 : 0);
+
 
       // Draw the nodes (circles)
       svg.selectAll(".node")
@@ -62,12 +55,8 @@ const SubgraphComponent = ({ size, nodes, links }) => {
         .attr("r", 12)
         .attr("fill", "black")
         .attr("class", "node")
-        .on("click", function(event, d) {
-          // Handle click event on nodes
-          const currentColor = d3.select(this).attr("fill");
-          const newColor = currentColor === "black" ? "red" : "black";
-          d3.select(this).attr("fill", newColor);
-        });
+        .attr("opacity", d => selectedNodes.includes(d.id) ? 1 : 0);
+
 
     }
   }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes

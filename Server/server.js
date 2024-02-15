@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jsdom from 'jsdom';
 const { JSDOM } = jsdom;
-import * as d3 from 'd3';
+
 
 
 const app = express();
@@ -19,7 +19,7 @@ app.post('/api/grid', (req, res) => {
 });
 
 
-function createAdjacencyMatrix(size) { //with nodes and links
+function createAdjacencyMatrix(size) {
   const matrix = [];
   for (let i = 0; i < size * size; i++) {
     matrix[i] = new Array(size * size).fill(0);
@@ -39,8 +39,6 @@ function createAdjacencyMatrix(size) { //with nodes and links
       matrix[i][i - size] = 1;
     }
   }
-
-  //console.log(matrix)
   return matrix;
 }
 
@@ -52,13 +50,15 @@ function createNodesandEdges(matrix){
     row.forEach((cell, j) => {
       if (cell === 1) {
         links.push({
+          id: `link-${i}-${j}`,
           source: i,
           target: j
         });
       }
     });
   });
-  return {nodes,links};
+  return { nodes, links };
+  
 }
 
 app.listen(port, () => {
