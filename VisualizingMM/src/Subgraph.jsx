@@ -45,9 +45,6 @@ const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) 
         .attr("opacity", d => selectedLinks.some(link => link.source === d.source && link.target === d.target) ? 1 : 0); //id as an identifier did not work
 
 
-          
-
-
       // Draw the nodes (circles)
       svg.selectAll(".node")
         .data(nodes)

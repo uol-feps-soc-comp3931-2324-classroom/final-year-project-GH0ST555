@@ -14,7 +14,7 @@ app.use(cors());
 app.post('/api/grid', (req, res) => {
   const { size } = req.body;
   const matrix = createAdjacencyMatrix(size);
-  const { nodes, links } = createNodesandEdges(matrix);
+  const { nodes, links } = createNodesandEdges(matrix,size);
   res.send({size,matrix,nodes,links});
 });
 
@@ -42,21 +42,41 @@ function createAdjacencyMatrix(size) {
   return matrix;
 }
 
-function createNodesandEdges(matrix){
+function createNodesandEdges(matrix, size){
   const nodes = matrix.map((_, i) => ({ id: i }));
   const links = [];
 
   matrix.forEach((row, i) => {
     row.forEach((cell, j) => {
       if (cell === 1) {
-        links.push({
-          id: `link-${i}-${j}`,
-          source: i,
-          target: j
-        });
+        // Calculate the row and column of the source and target nodes
+        const sourceRow = Math.floor(i / size);
+        const sourceCol = i % size;
+        const targetRow = Math.floor(j / size);
+        const targetCol = j % size;
+        
+        // Determine if the edge is horizontal or vertical
+        if (sourceRow === targetRow) {
+          // If the rows are the same and the columns differ by 1, it's a horizontal edge
+          links.push({
+            id: `link-${i}-${j}`,
+            source: i,
+            target: j,
+            edgetype: 'Horizontal'
+          });
+        } else if (sourceCol === targetCol) {
+          // If the columns are the same and the rows differ by 1, it's a vertical edge
+          links.push({
+            id: `link-${i}-${j}`,
+            source: i,
+            target: j,
+            edgetype: 'Vertical'
+          });
+        }
       }
     });
   });
+  
   return { nodes, links };
   
 }

@@ -58,6 +58,7 @@ const GridSizeForm = () => {
       const response = await axios.post(`${serverUrl}/api/grid`, { size: parseInt(size, 10) });
       setGridData(response.data); // Set the grid data which will be used by the GridComponent
       setsubgraphDataData(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error('Error creating grid:', error);
     }
