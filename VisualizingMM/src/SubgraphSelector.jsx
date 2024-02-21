@@ -15,22 +15,32 @@ const SubgraphSelector = ({ size, nodes, links,onNodeSelect, onLinkSelect }) => 
       // Clear any existing SVG to avoid duplicates
       d3.select(d3Container.current).selectAll("*").remove();
 
-      // Set dimensions and gap for the grid
-      const width = 750;
-      const height = 750;
-      const gap = (width - 2 * 30) / (size + 1);
-
-      // Create the SVG element
-      const svg = d3.select(d3Container.current)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
-
-      // Set the positions of the nodes
-      nodes.forEach(node => {
-        node.x = (node.id % size) * gap + 30;
-        node.y = Math.floor(node.id / size) * gap + 30;
-      });
+            // Base cell size
+            const cellSize = 50; // This remains constant for node visualization
+            const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+      
+            // Increase the distance between nodes dynamically
+            // For example, add an additional distance based on the grid size
+            const additionalDistance = 50; // This could be more sophisticated based on 'size'
+            const gap = cellSize + additionalDistance;
+      
+            // Calculate dynamic SVG dimensions based on the new gap
+            const width = size * gap + margin.left + margin.right - additionalDistance; // Adjust for the gap in the last cell
+            const height = size * gap + margin.top + margin.bottom - additionalDistance;
+      
+            const svg = d3.select(d3Container.current)
+              .append('svg')
+              .attr('width', width)
+              .attr('height', height)
+              .append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
+      
+            // Adjust node positions based on the increased gap
+            nodes.forEach(node => {
+              node.x = (node.id % size) * gap + gap / 2; // Center nodes within the increased gap
+              node.y = Math.floor(node.id / size) * gap + gap / 2;
+            });
+      
 
       // Draw the links (lines)
       //added a class attribte and event handler for clicking to identify edge was clicked
@@ -61,7 +71,7 @@ const SubgraphSelector = ({ size, nodes, links,onNodeSelect, onLinkSelect }) => 
         .append("circle")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
-        .attr("r", 12)
+        .attr("r", cellSize/4)
         .attr("fill", "black")
         .attr("class", "node")
         .on("click", function(event, d) {

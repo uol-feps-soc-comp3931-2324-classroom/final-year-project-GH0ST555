@@ -1,38 +1,42 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-//This is the Grid Component.
-//Takes in the data from the endpoint and uses d3 to create a grid enclosed in an svg
+//The Component Used To Describe the Grid
 const GridComponent = ({ size, nodes, links }) => {
-  // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
   useEffect(() => {
     if (d3Container.current && nodes && links) {
-      // Clear any existing SVG to avoid duplicates
       d3.select(d3Container.current).selectAll("*").remove();
 
-      // Set dimensions and gap for the grid
-      const width = 750;
-      const height = 750;
-      const gap = (width - 2 * 30) / (size + 1);
+      // Base cell size
+      const cellSize = 50; // This remains constant for node visualization
+      const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-      // Create the SVG element
+      // Increase the distance between nodes
+      const additionalDistance = 50;
+      const gap = cellSize + additionalDistance;
+
+      // Calculate dynamic SVG dimensions based on the new gap
+      const width = size * gap + margin.left + margin.right - additionalDistance; // Adjust for the gap in the last cell
+      const height = size * gap + margin.top + margin.bottom - additionalDistance;
+
       const svg = d3.select(d3Container.current)
         .append('svg')
         .attr('width', width)
-        .attr('height', height);
+        .attr('height', height)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      // Set the positions of the nodes
+      // Adjust node positions based on the increased gap
       nodes.forEach(node => {
-        node.x = (node.id % size) * gap + 30;
-        node.y = Math.floor(node.id / size) * gap + 30;
+        node.x = (node.id % size) * gap + gap / 2; // Center nodes within the increased gap
+        node.y = Math.floor(node.id / size) * gap + gap / 2;
       });
 
-      // Draw the links (lines)
-      //added a class attribte and event handler for clicking to identify edge was clicked
+      // Draw the edges (lines)
       svg.selectAll(".edge")
-        .data(links, d => d.id)
+        .data(links)
         .enter()
         .append("line")
         .attr("x1", d => nodes[d.source].x)
@@ -41,8 +45,7 @@ const GridComponent = ({ size, nodes, links }) => {
         .attr("y2", d => nodes[d.target].y)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
-        .attr("id", d => d.id)
-        .attr("class", "edge")
+        .attr("class", "edge");
 
       // Draw the nodes (circles)
       svg.selectAll(".node")
@@ -51,17 +54,14 @@ const GridComponent = ({ size, nodes, links }) => {
         .append("circle")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
-        .attr("r", 12)
+        .attr("r", cellSize / 4) 
         .attr("fill", "black")
-        .attr("class", "node")
-
+        .attr("class", "node");
 
     }
   }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes
 
-  return (
-    <div ref={d3Container} />
-  );
+  return <div ref={d3Container} />;
 };
 
 export default GridComponent;

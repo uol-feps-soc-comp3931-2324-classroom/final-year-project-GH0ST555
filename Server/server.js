@@ -19,6 +19,28 @@ app.post('/api/grid', (req, res) => {
 });
 
 
+app.post('/api/dilateGrid', (req, res) => {
+  const {size,selectedNodes,selectedLinks, nodes, links } = req.body;
+
+  // Perform dilation
+  const newSelectedNodes = new Set(selectedNodes); // Use a Set for efficient lookups and to avoid duplicates
+  selectedNodes.forEach(nodeId => {
+    const neighbors = getNeighbors(nodeId,size);
+    neighbors.forEach(neighbor => {
+      if (!newSelectedNodes.has(neighbor)) {
+        newSelectedNodes.add(neighbor);
+      }
+    });
+  });
+
+  // Convert the Set back to an array for the response
+  const dilatedSelectedNodes = Array.from(newSelectedNodes);
+
+  // Respond with the updated list of selected nodes
+  res.json({ dilatedNodes: dilatedSelectedNodes, selectedLinks });
+});
+
+
 function createAdjacencyMatrix(size) {
   const matrix = [];
   for (let i = 0; i < size * size; i++) {
@@ -80,7 +102,23 @@ function createNodesandEdges(matrix, size){
   return { nodes, links };
   
 }
+  // Helper function to get node's neighbors
+  function getNeighbors(nodeId, size) {
+    const row = Math.floor(nodeId / size);
+    const col = nodeId % size;
+    const neighbors = [];
 
+    // Add left neighbor if not on the left edge
+    if (col > 0) neighbors.push(nodeId - 1);
+    // Add right neighbor if not on the right edge
+    if (col < size - 1) neighbors.push(nodeId + 1);
+    // Add top neighbor if not on the top edge
+    if (row > 0) neighbors.push(nodeId - size);
+    // Add bottom neighbor if not on the bottom edge
+    if (row < size - 1) neighbors.push(nodeId + size);
+
+    return neighbors;
+  }
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
