@@ -1,25 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-//The Component Used To Describe the Grid
-const GridComponent = ({ size, nodes, links }) => {
+// Updated component to accept rows and cols
+const GridComponent = ({ rows, cols, nodes, links }) => {
   const d3Container = useRef(null);
 
   useEffect(() => {
     if (d3Container.current && nodes && links) {
       d3.select(d3Container.current).selectAll("*").remove();
 
-      // Base cell size
       const cellSize = 50; // This remains constant for node visualization
       const margin = { top: 30, right: 30, bottom: 30, left: 30 };
-
-      // Increase the distance between nodes
-      const additionalDistance = 50;
+      const additionalDistance = 50; // Additional distance between nodes
       const gap = cellSize + additionalDistance;
 
-      // Calculate dynamic SVG dimensions based on the new gap
-      const width = size * gap + margin.left + margin.right - additionalDistance; // Adjust for the gap in the last cell
-      const height = size * gap + margin.top + margin.bottom - additionalDistance;
+      // Calculate dynamic SVG dimensions
+      const width = cols * gap + margin.left + margin.right - additionalDistance;
+      const height = rows * gap + margin.top + margin.bottom - additionalDistance;
 
       const svg = d3.select(d3Container.current)
         .append('svg')
@@ -30,8 +27,10 @@ const GridComponent = ({ size, nodes, links }) => {
 
       // Adjust node positions based on the increased gap
       nodes.forEach(node => {
-        node.x = (node.id % size) * gap + gap / 2; // Center nodes within the increased gap
-        node.y = Math.floor(node.id / size) * gap + gap / 2;
+        const nodeRow = Math.floor(node.id / cols);
+        const nodeCol = node.id % cols;
+        node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
+        node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
       });
 
       // Draw the edges (lines)
@@ -54,12 +53,12 @@ const GridComponent = ({ size, nodes, links }) => {
         .append("circle")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
-        .attr("r", cellSize / 4) 
+        .attr("r", cellSize / 4)
         .attr("fill", "black")
         .attr("class", "node");
 
     }
-  }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes
+  }, [nodes, links, rows, cols]); // Updated dependency array
 
   return <div ref={d3Container} />;
 };

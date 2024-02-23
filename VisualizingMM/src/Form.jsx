@@ -11,7 +11,8 @@ import 'react-dropdown/style.css'
 const serverUrl = import.meta.env.VITE_REACT_APP_SERVER_URL;
 
 const GridSizeForm = () => {
-  const [size, setSize] = useState('');
+  const [rows, setRows] = useState('');
+  const [cols, setCols] = useState('');
   const [gridData, setGridData] = useState(null); 
   const [subgraphData, setsubgraphDataData] = useState(null); 
 
@@ -23,9 +24,11 @@ const GridSizeForm = () => {
   const [dilatedData,setDilatedData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
 
+  const [selectedOption, setSelectedOption] = useState("Single Node");
+
 
     const options = [
-      'Node', 'Horizontal-Edge', 'Vertical-Edge'
+      'Single Node', 'Horizontal-Edge', 'Vertical-Edge'
     ];
     const defaultOption = options[0];
 
@@ -67,7 +70,7 @@ const GridSizeForm = () => {
       setGenerateSG(false);
       setSelectedNodes([]);
       setSelectedLinks([]);
-      const response = await axios.post(`${serverUrl}/api/grid`, { size: parseInt(size, 10) });
+      const response = await axios.post(`${serverUrl}/api/grid`, { rows:rows, cols:cols });
       setGridData(response.data); // Set the grid data which will be used by the GridComponent
       setsubgraphDataData(response.data);
       console.log(response.data);
@@ -79,7 +82,7 @@ const GridSizeForm = () => {
   const handleDilation = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${serverUrl}/api/dilateGrid`, {size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links });
+      const response = await axios.post(`${serverUrl}/api/dilateGrid`, {size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
       setDilatedData(response.data);
     } catch (error) {
       console.error('Error Dilating Grid:', error);
@@ -91,7 +94,8 @@ const GridSizeForm = () => {
       <form onSubmit={handleSubmit}>
         <label>
           Grid Size (N x N):
-          <input type="number" value={size} onChange={(e) => setSize(e.target.value)} min="1" />
+          <input type="number" value={rows} onChange={(e) => setRows(parseInt(e.target.value, 10))} min="1" placeholder="Rows"/>
+          <input type="number" value={cols} onChange={(e) => setCols(parseInt(e.target.value, 10))} min="1" placeholder="Columns"/>
         </label>
         <button type="submit">Create Grid</button>
       </form>
@@ -108,22 +112,22 @@ const GridSizeForm = () => {
                                 <button onClick= {() => {close(); setGenerateSG(true)}}> Submit Subgraph </button>
                             </div>
                           <p>Select the edges/nodes you would want part of the Subgraphs. Selected Elements Turn Red</p>
-                          <SubgraphSelector size={gridData.size} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} />
+                          <SubgraphSelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} />
                         </div>
                     )
                 }
             </Popup>
-            <Dropdown options={options}  value={defaultOption} placeholder="Select Structuring Element" />
+            <Dropdown options={options} onChange={({ value }) => setSelectedOption(value)} value={defaultOption} placeholder="Select Structuring Element" />
             <Dropdown options={MMoperation}  value={defaultMMOpertaion} placeholder="Select MM Operation" />
             <button onClick= {handleDilation}> Perform Operation </button>
         <p>This Is The Grid</p>
-        <GridComponent size={gridData.size} nodes={gridData.nodes} links={gridData.links} />
+        <GridComponent rows={gridData.rows} cols ={gridData.cols} nodes={gridData.nodes} links={gridData.links} />
         </>
       )}
       {generateSG && (
         <>
         <p>This Is The SubGraph</p>
-        <SubgraphComponent size={gridData.size} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />
+        <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />
         
         </>
       )}
@@ -132,7 +136,7 @@ const GridSizeForm = () => {
       {dilatedData && (
               <>
               <p>This Is The Dilated Data</p>
-              <SubgraphComponent size={gridData.size} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.selectedLinks} />
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} />
               
               </>
             )}

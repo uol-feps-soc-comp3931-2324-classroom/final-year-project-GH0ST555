@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
 //The component that will display the subgraph
-const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) => {
+const SubgraphComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -20,53 +20,56 @@ const SubgraphComponent = ({ size, nodes, links,selectedNodes, selectedLinks }) 
         const additionalDistance = 50; // This could be more sophisticated based on 'size'
         const gap = cellSize + additionalDistance;
   
-        // Calculate dynamic SVG dimensions based on the new gap
-        const width = size * gap + margin.left + margin.right - additionalDistance; // Adjust for the gap in the last cell
-        const height = size * gap + margin.top + margin.bottom - additionalDistance;
-  
+        // Calculate dynamic SVG dimensions
+        const width = cols * gap + margin.left + margin.right - additionalDistance;
+        const height = rows * gap + margin.top + margin.bottom - additionalDistance;
+
         const svg = d3.select(d3Container.current)
           .append('svg')
           .attr('width', width)
           .attr('height', height)
           .append("g")
           .attr("transform", `translate(${margin.left},${margin.top})`);
-  
+
         // Adjust node positions based on the increased gap
         nodes.forEach(node => {
-          node.x = (node.id % size) * gap + gap / 2; // Center nodes within the increased gap
-          node.y = Math.floor(node.id / size) * gap + gap / 2;
+          const nodeRow = Math.floor(node.id / cols);
+          const nodeCol = node.id % cols;
+          node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
+          node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
         });
 
-      // Draw the links (lines)
-      //added a class attribte and event handler for clicking to identify edge was clicked
-      svg.selectAll(".edge")
-        .data(links)
-        .enter()
-        .append("line")
-        .attr("x1", d => nodes[d.source].x)
-        .attr("y1", d => nodes[d.source].y)
-        .attr("x2", d => nodes[d.target].x)
-        .attr("y2", d => nodes[d.target].y)
-        .attr("stroke", d => selectedLinks.some(link => link.source === d.source && link.target === d.target) ? 'blue' : 'black') //id as an identifier did not work
-        .attr("stroke-width", 3)
-        .attr("id", d => d.id)
-        .attr("class", "edge");
-        
+      // Fallback to an empty array if selectedLinks or selectedNodes is null
+      const safeSelectedLinks = selectedLinks || [];
+      const safeSelectedNodes = selectedNodes || [];
 
+      // Draw the links (lines)
+      svg.selectAll(".edge")
+          .data(links)
+          .enter()
+          .append("line")
+          .attr("x1", d => nodes[d.source].x)
+          .attr("y1", d => nodes[d.source].y)
+          .attr("x2", d => nodes[d.target].x)
+          .attr("y2", d => nodes[d.target].y)
+          .attr("stroke", d => safeSelectedLinks.some(link => link.source === d.source && link.target === d.target) ? 'blue' : 'black')
+          .attr("stroke-width", 3)
+          .attr("id", d => d.id)
+          .attr("class", "edge");
 
       // Draw the nodes (circles)
       svg.selectAll(".node")
-        .data(nodes)
-        .enter()
-        .append("circle")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("r", cellSize/4)
-        .attr("fill", d => selectedNodes.includes(d.id) ? "blue" : "black")
-        .attr("class", "node")
+          .data(nodes)
+          .enter()
+          .append("circle")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y)
+          .attr("r", cellSize / 4)
+          .attr("fill", d => safeSelectedNodes.includes(d.id) ? "blue" : "black")
+          .attr("class", "node");
 
-    }
-  }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes
+          }
+  }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes
 
   return (
     <div ref={d3Container} />

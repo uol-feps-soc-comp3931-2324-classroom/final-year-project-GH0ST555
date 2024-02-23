@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 //This component is explicitly used for Selecting the Subgraphs
 //Idea being when the particular edges are clicked color changes
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
-const SubgraphSelector = ({ size, nodes, links,onNodeSelect, onLinkSelect }) => {
+const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -15,31 +15,33 @@ const SubgraphSelector = ({ size, nodes, links,onNodeSelect, onLinkSelect }) => 
       // Clear any existing SVG to avoid duplicates
       d3.select(d3Container.current).selectAll("*").remove();
 
-            // Base cell size
-            const cellSize = 50; // This remains constant for node visualization
-            const margin = { top: 30, right: 30, bottom: 30, left: 30 };
-      
-            // Increase the distance between nodes dynamically
-            // For example, add an additional distance based on the grid size
-            const additionalDistance = 50; // This could be more sophisticated based on 'size'
-            const gap = cellSize + additionalDistance;
-      
-            // Calculate dynamic SVG dimensions based on the new gap
-            const width = size * gap + margin.left + margin.right - additionalDistance; // Adjust for the gap in the last cell
-            const height = size * gap + margin.top + margin.bottom - additionalDistance;
-      
-            const svg = d3.select(d3Container.current)
-              .append('svg')
-              .attr('width', width)
-              .attr('height', height)
-              .append("g")
-              .attr("transform", `translate(${margin.left},${margin.top})`);
-      
-            // Adjust node positions based on the increased gap
-            nodes.forEach(node => {
-              node.x = (node.id % size) * gap + gap / 2; // Center nodes within the increased gap
-              node.y = Math.floor(node.id / size) * gap + gap / 2;
-            });
+      // Base cell size
+      const cellSize = 50; // This remains constant for node visualization
+      const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+
+      // Increase the distance between nodes dynamically
+      // For example, add an additional distance based on the grid size
+      const additionalDistance = 50; // This could be more sophisticated based on 'size'
+      const gap = cellSize + additionalDistance;
+
+      // Calculate dynamic SVG dimensions
+      const width = cols * gap + margin.left + margin.right - additionalDistance;
+      const height = rows * gap + margin.top + margin.bottom - additionalDistance;
+
+      const svg = d3.select(d3Container.current)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // Adjust node positions based on the increased gap
+      nodes.forEach(node => {
+        const nodeRow = Math.floor(node.id / cols);
+        const nodeCol = node.id % cols;
+        node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
+        node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
+      });
       
 
       // Draw the links (lines)
@@ -83,7 +85,7 @@ const SubgraphSelector = ({ size, nodes, links,onNodeSelect, onLinkSelect }) => 
         });
 
     }
-  }, [nodes, links, size]); // Dependency array to re-run the effect when the data changes
+  }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes
 
   return (
     <div ref={d3Container} />
