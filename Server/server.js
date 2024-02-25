@@ -1,9 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import jsdom from 'jsdom';
+import { link } from 'd3';
 const { JSDOM } = jsdom;
-
-
 
 const app = express();
 const port = 3001;
@@ -22,28 +21,9 @@ app.post('/api/grid', (req, res) => {
 
 app.post('/api/dilateGrid', (req, res) => {
   const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
-  // Perform dilation when SE is a single Node
-  //THis results in all Selected nodes being highlighted only
-  //THerefore Dilated Subgaprh would be Only Selected Nodes
-  if (SE == 'Single Node'){
-    res.json({ dilatedNodes: selectedNodes, dilatedLinks: null })
-  }
 
-  // const newSelectedNodes = new Set(selectedNodes); // Use a Set for efficient lookups and to avoid duplicates
-  // selectedNodes.forEach(nodeId => {
-  //   const neighbors = getNeighbors(nodeId,rows,cols);
-  //   neighbors.forEach(neighbor => {
-  //     if (!newSelectedNodes.has(neighbor)) {
-  //       newSelectedNodes.add(neighbor);
-  //     }
-  //   });
-  // });
+  res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
 
-  // // Convert the Set back to an array for the response
-  // const dilatedSelectedNodes = Array.from(newSelectedNodes);
-
-  // Respond with the updated list of selected nodes
-  // res.json({ dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks });
 });
 
 
@@ -104,17 +84,83 @@ function createNodesandEdges(matrix, rows, cols) {
   return { nodes, links };
 }
 
+//perform dilation
+//The idea is to match the orign SE to elemtents of the subgraph
+//if there is match, the SE is added to the subgraph
+function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
+  //Single Node SE, Nodes are dilated, removing edges
+  if (SE == 'Single Node'){
+    return { dilatedNodes: selectedNodes, dilatedLinks: null }
+  }
+
+  //Origin is at the center
+  //Means That all neighbours that are not in the subgraph are added in this case of dilation
+  else if (SE == 'cross shaped(No Edges)'){
+    const newSelectedNodes = new Set(selectedNodes); // Use a Set for efficient lookups and to avoid duplicates
+    selectedNodes.forEach(nodeId => {
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      neighbors.forEach(neighbor => {
+        if (!newSelectedNodes.has(neighbor)) {
+          newSelectedNodes.add(neighbor);
+        }
+      });
+    });
+
+    // Convert the Set back to an array for the response
+    const dilatedSelectedNodes = Array.from(newSelectedNodes);
+
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+  }
+
+  else if (SE == 'Node + Edge + RNode'){
+    console.log(selectedLinks);
+    const newSelectedNodes = new Set(selectedNodes); // Use a Set for efficient lookups and to avoid duplicates
+    selectedNodes.forEach(nodeId => {
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      // if R neighbour exists and not present in the selected nodes 
+      if(neighbors.includes(nodeId+1) && !newSelectedNodes.has(nodeId+1)){
+          newSelectedNodes.add(nodeId+1);
+          const linkbwNodes = `link-${nodeId+1}-${nodeId}`
+          const linkObject = links.find(link => link.id === linkbwNodes);
+          if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
+            selectedLinks.push(linkObject); 
+          }
+      }
+
+      //if R neighbour Exists and Is present in selected nodes. We still need to check if the edge between them exists
+      else if(neighbors.includes(nodeId+1) && newSelectedNodes.has(nodeId+1)){
+        const linkbwNodes = `link-${nodeId+1}-${nodeId}`
+        const linkObject = links.find(link => link.id === linkbwNodes);
+        if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
+          selectedLinks.push(linkObject); 
+        }
+    };
+    });
+
+    // Convert the Set back to an array for the response
+    const dilatedSelectedNodes = Array.from(newSelectedNodes);
+    console.log(selectedLinks);
+
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+  }
+}
+
 function getNeighbors(nodeId, rows, cols) {
-  const totalNodes = rows * cols;
   const row = Math.floor(nodeId / cols);
   const col = nodeId % cols;
   const neighbors = [];
 
-  if (col > 0) neighbors.push(nodeId - 1); // Left
-  if (col < cols - 1) neighbors.push(nodeId + 1); // Right
-  if (row > 0) neighbors.push(nodeId - cols); // Top
-  if (row < rows - 1) neighbors.push(nodeId + cols); // Bottom
+  // Check left neighbor
+  if (col > 0) neighbors.push(nodeId - 1);
 
+  // Check right neighbor
+  if (col < cols - 1) neighbors.push(nodeId + 1);
+
+  // Check top neighbor
+  if (row > 0) neighbors.push(nodeId - cols);
+
+  // Check bottom neighbor
+  if (row < rows - 1) neighbors.push(nodeId + cols);
   return neighbors;
 }
 
