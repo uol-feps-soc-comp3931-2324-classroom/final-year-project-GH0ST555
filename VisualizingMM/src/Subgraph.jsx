@@ -12,12 +12,11 @@ const SubgraphComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLink
       d3.select(d3Container.current).selectAll("*").remove();
 
         // Base cell size
-        const cellSize = 50; // This remains constant for node visualization
+        const cellSize = 50;
         const margin = { top: 30, right: 30, bottom: 30, left: 30 };
   
         // Increase the distance between nodes dynamically
-        // For example, add an additional distance based on the grid size
-        const additionalDistance = 50; // This could be more sophisticated based on 'size'
+        const additionalDistance = 50; 
         const gap = cellSize + additionalDistance;
   
         // Calculate dynamic SVG dimensions

@@ -21,7 +21,7 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect }
 
       // Increase the distance between nodes dynamically
       // For example, add an additional distance based on the grid size
-      const additionalDistance = 50; // This could be more sophisticated based on 'size'
+      const additionalDistance = 50;
       const gap = cellSize + additionalDistance;
 
       // Calculate dynamic SVG dimensions

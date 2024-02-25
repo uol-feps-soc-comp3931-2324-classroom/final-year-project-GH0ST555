@@ -10,6 +10,7 @@ const port = 3001;
 app.use(express.json());
 app.use(cors());
 
+//Endpoints To Perform Computations
 app.post('/api/grid', (req, res) => {
   const { rows,cols } = req.body;
   const matrix = createAdjacencyMatrix(rows,cols);
@@ -17,7 +18,6 @@ app.post('/api/grid', (req, res) => {
 
   res.send({rows,cols,matrix,nodes,links});
 });
-
 
 app.post('/api/dilateGrid', (req, res) => {
   const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
@@ -253,11 +253,56 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   }
 }
 
+//Function that performs erosion 
+//The idea behind erosion is to find the largest portion of the subgraph when dilated with the SE does not exceed the sturcture of the subgraph
+// Takes in Similar params like the dilation function and returns similar output, making it consitent and helps with rendering client side
 function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   if (SE == 'Single Node'){
     return { dilatedNodes: selectedNodes, dilatedLinks: null }
   }
+  else if (SE == 'cross shaped(No Edges)'){
+    const newSelectedNodes = new Set(); // Use a Set for efficient lookups and to avoid duplicates
+    selectedNodes.forEach(nodeId => {
+      var AllNeighboursExist = true;
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      if (neighbors.length != 4){
+        AllNeighboursExist = false;
+      }
+      neighbors.forEach(neighbor => {
+        if (!selectedNodes.includes(neighbor)) {
+          AllNeighboursExist = false;
+        }
+      });
+      if(AllNeighboursExist){
+        newSelectedNodes.add(nodeId);
+      }
+    });
+
+    // Convert the Set back to an array for the response
+    const dilatedSelectedNodes = Array.from(newSelectedNodes);
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
+
+  }
+
+  //origin is the node followed by the edge and its right node
+  // N==N
+  // *
+  else if (SE == 'Node + Edge + RNode'){
+    const newSelectedNodes = new Set();
+    selectedNodes.forEach(nodeId => {
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      // if R neighbour exists and present in the selected nodes 
+      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+1) && selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)){
+          newSelectedNodes.add(nodeId);
+      }
+    });
+    // Convert the Set back to an array for the response
+    const dilatedSelectedNodes = Array.from(newSelectedNodes);
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
+  }
 }
+
+
 //given a node and the structure of the grid,
 //Retrieves all possible neighbours in the form of an array
 function getNeighbors(nodeId, rows, cols) {
@@ -284,8 +329,6 @@ function getConnectedLinks(nodeId, links) {
   const connectedLinks = links.filter(link => link.source === nodeId || link.target === nodeId);  
   return connectedLinks;
 }
-
-
 
 
 app.listen(port, () => {

@@ -34,7 +34,6 @@ const GridSizeForm = () => {
     ];
     const defaultOption = options[0];
 
-
     const MMoperation = [
       'Dilation', 'Erosion'
     ];
@@ -151,8 +150,7 @@ const GridSizeForm = () => {
       {generateSG && (
         <>
         <p>This Is The SubGraph</p>
-        <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />
-        
+        <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />  
         </>
       )}
 
@@ -161,18 +159,14 @@ const GridSizeForm = () => {
               <>
               <p>This Is The Dilated Data</p>
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} />
-              
               </>
             )}
       {erodedData && (
               <>
               <p>This Is The Eroded Data</p>
-              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.dilatedNodes} selectedLinks={erodedData.dilatedLinks} />
-              
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.dilatedNodes} selectedLinks={erodedData.dilatedLinks} /> 
               </>
-            )}
-
-      
+            )}   
     </div>
   );
 };

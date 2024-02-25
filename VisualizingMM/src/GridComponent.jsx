@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-// Updated component to accept rows and cols
+
 const GridComponent = ({ rows, cols, nodes, links }) => {
   const d3Container = useRef(null);
 
