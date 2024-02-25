@@ -25,6 +25,11 @@ app.post('/api/dilateGrid', (req, res) => {
 
 });
 
+app.post('/api/erodeGrid', (req, res) => {
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
+  res.json(erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+});
+
 
 function createAdjacencyMatrix(rows, cols) {
   const size = rows * cols;
@@ -107,7 +112,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 
     // Convert the Set back to an array for the response
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
   }
 
   //origin is the node followed by the edge and its right node
@@ -115,6 +120,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   // *
   else if (SE == 'Node + Edge + RNode'){
     const newSelectedNodes = new Set(selectedNodes);
+    const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
       const neighbors = getNeighbors(nodeId,rows,cols);
       // if R neighbour exists and not present in the selected nodes 
@@ -123,7 +129,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
           const linkbwNodes = `link-${nodeId+1}-${nodeId}`
           const linkObject = links.find(link => link.id === linkbwNodes);
           if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
-            selectedLinks.push(linkObject); 
+            dilatedLinks.push(linkObject); 
           }
       }
 
@@ -132,7 +138,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         const linkbwNodes = `link-${nodeId+1}-${nodeId}`
         const linkObject = links.find(link => link.id === linkbwNodes);
         if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
-          selectedLinks.push(linkObject); 
+          dilatedLinks.push(linkObject); 
         }
     }
 
@@ -140,18 +146,23 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 
     // Convert the Set back to an array for the response
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: dilatedLinks };
   }
 
 
 
   else if (SE == 'Horizontal Edge'){
-    const newSelectedNodes = new Set(selectedNodes); 
+    const newSelectedNodes = new Set(); 
+    const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
       const neighbors = getNeighbors(nodeId,rows,cols);
       const neighborsR = getNeighbors(nodeId+1,rows,cols);
       //A node, its neighbour and its edge needs to be present to perfrom dilation in this case
-      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+1) && selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)){
+      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+1) &&  selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)){
+        newSelectedNodes.add(nodeId);
+        newSelectedNodes.add(nodeId+1);
+        dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
+
         neighbors.forEach(neighbor => {
           if (!newSelectedNodes.has(neighbor)) {
             newSelectedNodes.add(neighbor);
@@ -173,7 +184,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         
           // If the link is not already in selectedLinks, add it
           if (!linkExistsInSelected) {
-            selectedLinks.push(link);
+            dilatedLinks.push(link);
           }
         });
         
@@ -181,23 +192,27 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         connectedLinksR.forEach(link => {
           const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
           if (!linkExistsInSelectedR) {
-            selectedLinks.push(link);
+            dilatedLinks.push(link);
           }
         });
     }
     });
 
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: dilatedLinks };
   }
 
   else if (SE == 'Vertical Edge'){
-    const newSelectedNodes = new Set(selectedNodes); 
+    const newSelectedNodes = new Set();
+    const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
       const neighbors = getNeighbors(nodeId,rows,cols);
       const neighborsB = getNeighbors(nodeId+cols,rows,cols);
       //A node, its neighbour and its edge needs to be present to perfrom dilation in this case
       if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+cols) && selectedLinks.some(link => link.id === `link-${nodeId+cols}-${nodeId}`)){
+        newSelectedNodes.add(nodeId);
+        newSelectedNodes.add(nodeId+cols);
+        dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+cols}-${nodeId}`));
         neighbors.forEach(neighbor => {
           if (!newSelectedNodes.has(neighbor)) {
             newSelectedNodes.add(neighbor);
@@ -219,7 +234,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         
           // If the link is not already in selectedLinks, add it
           if (!linkExistsInSelected) {
-            selectedLinks.push(link);
+            dilatedLinks.push(link);
           }
         });
         
@@ -227,22 +242,26 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         connectedLinksB.forEach(link => {
           const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
           if (!linkExistsInSelectedR) {
-            selectedLinks.push(link);
+            dilatedLinks.push(link);
           }
         });
     }
     });
 
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: selectedLinks };
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: dilatedLinks };
   }
 }
 
-
+function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
+  if (SE == 'Single Node'){
+    return { dilatedNodes: selectedNodes, dilatedLinks: null }
+  }
+}
 //given a node and the structure of the grid,
 //Retrieves all possible neighbours in the form of an array
 function getNeighbors(nodeId, rows, cols) {
-  const row = Math.floor(nodeId / cols);
+ const row = Math.floor(nodeId / cols);
   const col = nodeId % cols;
   const neighbors = [];
 
@@ -262,9 +281,7 @@ function getNeighbors(nodeId, rows, cols) {
 
 function getConnectedLinks(nodeId, links) {
   // Filter links where the current nodeId is either the source or the target
-  const connectedLinks = links.filter(link => link.source === nodeId || link.target === nodeId);
-  console.log(connectedLinks);
-  
+  const connectedLinks = links.filter(link => link.source === nodeId || link.target === nodeId);  
   return connectedLinks;
 }
 

@@ -22,9 +22,11 @@ const GridSizeForm = () => {
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [selectedLinks, setSelectedLinks] = useState([]);
   const [dilatedData,setDilatedData] = useState(null);
+  const [erodedData,setErodedData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
 
   const [selectedOption, setSelectedOption] = useState("Single Node");
+  const  [selectedMMop, setSelectedMMop] = useState("Dilation");
 
 
     const options = [
@@ -80,7 +82,6 @@ const GridSizeForm = () => {
   };
 
   const handleDilation = async (e) => {
-    e.preventDefault();
     try {
       const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
       setDilatedData(response.data);
@@ -89,6 +90,28 @@ const GridSizeForm = () => {
       console.error('Error Dilating Grid:', error);
     }
   };
+
+
+  const handleErosion = async (e) => {
+    try {
+      const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
+      setErodedData(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error Eroding Grid:', error);
+    }
+  };
+
+  const handleOperationClick = async () => {
+    if (selectedMMop === "Dilation") {
+      await handleDilation();
+    } else if (selectedMMop === "Erosion") {
+      await handleErosion();
+    } else {
+      console.log("No operation or unrecognized operation selected");
+    }
+  };
+  
 
   return (
     <div>
@@ -119,8 +142,8 @@ const GridSizeForm = () => {
                 }
             </Popup>
             <Dropdown options={options} onChange={({ value }) => setSelectedOption(value)} value={defaultOption} placeholder="Select Structuring Element" />
-            <Dropdown options={MMoperation}  value={defaultMMOpertaion} placeholder="Select MM Operation" />
-            <button onClick= {handleDilation}> Perform Operation </button>
+            <Dropdown options={MMoperation} onChange={({ value }) => setSelectedMMop(value)} value={defaultMMOpertaion} placeholder="Select MM Operation" />
+            <button onClick= {handleOperationClick}> Perform Operation </button>
         <p>This Is The Grid</p>
         <GridComponent rows={gridData.rows} cols ={gridData.cols} nodes={gridData.nodes} links={gridData.links} />
         </>
@@ -138,6 +161,13 @@ const GridSizeForm = () => {
               <>
               <p>This Is The Dilated Data</p>
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} />
+              
+              </>
+            )}
+      {erodedData && (
+              <>
+              <p>This Is The Eroded Data</p>
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.dilatedNodes} selectedLinks={erodedData.dilatedLinks} />
               
               </>
             )}
