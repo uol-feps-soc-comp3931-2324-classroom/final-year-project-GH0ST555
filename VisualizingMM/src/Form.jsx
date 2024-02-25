@@ -28,7 +28,7 @@ const GridSizeForm = () => {
 
 
     const options = [
-      'Single Node', 'Horizontal-Edge', 'Vertical-Edge','cross shaped(No Edges)', 'Node + Edge + RNode'
+      'Single Node', 'Horizontal-Edge', 'Vertical-Edge','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge'
     ];
     const defaultOption = options[0];
 
