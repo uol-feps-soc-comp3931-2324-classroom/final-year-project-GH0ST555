@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-//This is the Subgraph Component.
-//Takes in the data from the endpoint and uses d3 to create a subgraph enclosed in an svg
-//This component is explicitly used for Selecting the Subgraphs
-//Idea being when the particular edges are clicked color changes
+//This is the SE Selector Component.
+//Takes in the data from the endpoint and uses d3 to create a visual of the Structuring Element enclosed in an svg
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
-const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,scenario }) => {
+const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -58,13 +56,8 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
         .attr("stroke-width", 3)
         .attr("id", d => d.id)
         .attr("class", "edge")
-        .on("click", function(event, d) {
-            // Handle click event on edges
-            const currentColor = d3.select(this).attr("stroke");
-            const newColor = currentColor === "black" ? "red" : "black";
-            d3.select(this).attr("stroke", newColor);
-            onLinkSelect(d,scenario);
-          });
+        .attr("opacity", d => selectedLinks.some(link => link.source === d.source && link.target === d.target) ? 1 : 0)
+
 
       // Draw the nodes (circles)
       svg.selectAll(".node")
@@ -76,13 +69,7 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
         .attr("r", cellSize/4)
         .attr("fill", "black")
         .attr("class", "node")
-        .on("click", function(event, d) {
-          // Handle click event on nodes
-          const currentColor = d3.select(this).attr("fill");
-          const newColor = currentColor === "black" ? "red" : "black";
-          d3.select(this).attr("fill", newColor);
-          onNodeSelect(d,scenario);
-        });
+        .attr("opacity", d => selectedNodes.includes(d.id) ? 1 : 0);
 
     }
   }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes
@@ -92,4 +79,4 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
   );
 };
 
-export default SubgraphSelector;
+export default SESelector;

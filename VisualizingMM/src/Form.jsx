@@ -6,8 +6,11 @@ import 'reactjs-popup/dist/index.css';
 import './App.css'
 import SubgraphSelector from './SubgraphSelector';
 import SubgraphComponent from './Subgraph';
+import SESelector from './SESelector';
 import Dropdown from 'react-dropdown';
+import SEComponent from './SEComponent';
 import 'react-dropdown/style.css'
+
 const serverUrl = import.meta.env.VITE_REACT_APP_SERVER_URL;
 
 const GridSizeForm = () => {
@@ -15,12 +18,15 @@ const GridSizeForm = () => {
   const [cols, setCols] = useState('');
   const [gridData, setGridData] = useState(null); 
   const [subgraphData, setsubgraphDataData] = useState(null); 
-
+  const [SEData, setSEData] = useState(null); 
+  const [customSE, setcustomSE] = useState(false);
 
   //To store selected nodes and links.
   //Will be useful for the generation of the subgraph
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [selectedLinks, setSelectedLinks] = useState([]);
+  const [selectedSENodes, setSelectedSENodes] = useState([]);
+  const [selectedSELinks, setSelectedSELinks] = useState([]);
   const [dilatedData,setDilatedData] = useState(null);
   const [erodedData,setErodedData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
@@ -39,30 +45,61 @@ const GridSizeForm = () => {
     ];
     const defaultMMOpertaion = MMoperation[0];
 
-  const onNodeSelect = (node) => {
-    setSelectedNodes(prevSelectedNodes => {
-      const isSelected = prevSelectedNodes.includes(node.id);
-      if (isSelected) {
-        // If already selected, remove it from the selection
-        return prevSelectedNodes.filter(id => id !== node.id);
-      } else {
-        // If not selected, add it to the selection
-        return [...prevSelectedNodes, node.id];
-      }
-    });
+  const onNodeSelect = (node, scenario) => {
+    if (scenario == 'Subgraph'){
+      setSelectedNodes(prevSelectedNodes => {
+        const isSelected = prevSelectedNodes.includes(node.id);
+        if (isSelected) {
+          // If already selected, remove it from the selection
+          return prevSelectedNodes.filter(id => id !== node.id);
+        } else {
+          // If not selected, add it to the selection
+          return [...prevSelectedNodes, node.id];
+        }
+      });
+    }
+    else if (scenario =='SE'){
+      setSelectedSENodes(prevSelectedNodes => {
+        const isSelected = prevSelectedNodes.includes(node.id);
+        if (isSelected) {
+          // If already selected, remove it from the selection
+          return prevSelectedNodes.filter(id => id !== node.id);
+        } else {
+          // If not selected, add it to the selection
+          return [...prevSelectedNodes, node.id];
+        }
+      });
+    }
+
   };
   
-  const onLinkSelect = (link) => {
-    setSelectedLinks(prevSelectedLinks => {
-      const isSelected = prevSelectedLinks.some(selectedLink => selectedLink.id === link.id);
-      if (isSelected) {
-        // If already selected, remove it from the selection
-        return prevSelectedLinks.filter(selectedLink => selectedLink.id !== link.id);
-      } else {
-        // If not selected, add it to the selection
-        return [...prevSelectedLinks, link];
-      }
-    });
+  const onLinkSelect = (link, scenario) => {
+    if (scenario == 'Subgraph'){
+      setSelectedLinks(prevSelectedLinks => {
+        const isSelected = prevSelectedLinks.some(selectedLink => selectedLink.id === link.id);
+        if (isSelected) {
+          // If already selected, remove it from the selection
+          return prevSelectedLinks.filter(selectedLink => selectedLink.id !== link.id);
+        } else {
+          // If not selected, add it to the selection
+          return [...prevSelectedLinks, link];
+        }
+      });
+    }
+    else if (scenario =='SE'){
+      setSelectedSELinks(prevSelectedLinks => {
+        const isSelected = prevSelectedLinks.some(selectedLink => selectedLink.id === link.id);
+        if (isSelected) {
+          // If already selected, remove it from the selection
+          return prevSelectedLinks.filter(selectedLink => selectedLink.id !== link.id);
+        } else {
+          // If not selected, add it to the selection
+          return [...prevSelectedLinks, link];
+        }
+      });
+    }
+
+
   };
   
   const handleSubmit = async (e) => {
@@ -135,7 +172,23 @@ const GridSizeForm = () => {
                                 <button onClick= {() => {close(); setGenerateSG(true)}}> Submit Subgraph </button>
                             </div>
                           <p>Select the edges/nodes you would want part of the Subgraphs. Selected Elements Turn Red</p>
-                          <SubgraphSelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} />
+                          <SubgraphSelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "Subgraph" />
+                        </div>
+                    )
+                }
+            </Popup>
+            <Popup trigger=
+                {<button> Select Custom SE </button>} 
+                modal nested>
+                {
+                    close => (
+                        <div className='modal'>
+                            <div>
+                                <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setcustomSE(false);}   }> Close </button>
+                                <button onClick= {() => {close(); setcustomSE(true)}}> Submit Subgraph </button>
+                            </div>
+                          <p>Select the edges/nodes you would want part of the Structuring Element. Selected Elements Turn Red</p>
+                          <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE"/>
                         </div>
                     )
                 }
@@ -151,6 +204,12 @@ const GridSizeForm = () => {
         <>
         <p>This Is The SubGraph</p>
         <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />  
+        </>
+      )}
+      {customSE && (
+        <>
+        <p>This Is The Selected Strucutring Element</p>
+        <SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} />  
         </>
       )}
 

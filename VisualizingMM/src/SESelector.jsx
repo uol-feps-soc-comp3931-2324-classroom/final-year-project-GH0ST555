@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-//This is the Subgraph Component.
-//Takes in the data from the endpoint and uses d3 to create a subgraph enclosed in an svg
+//This is the SE Selector Component.
+//Takes in the data from the endpoint and uses d3 to create a visual of the Structuring Element enclosed in an svg
 //This component is explicitly used for Selecting the Subgraphs
 //Idea being when the particular edges are clicked color changes
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
-const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,scenario }) => {
+const SESelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,scenario }) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -92,4 +92,4 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
   );
 };
 
-export default SubgraphSelector;
+export default SESelector;

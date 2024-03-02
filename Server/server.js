@@ -126,6 +126,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
       // if R neighbour exists and not present in the selected nodes 
       if(neighbors.includes(nodeId+1) && !newSelectedNodes.has(nodeId+1)){
           newSelectedNodes.add(nodeId+1);
+          dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
           const linkbwNodes = `link-${nodeId+1}-${nodeId}`
           const linkObject = links.find(link => link.id === linkbwNodes);
           if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
@@ -152,6 +153,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 
 
   else if (SE == 'Horizontal Edge'){
+    console.log('HUH?');
     const newSelectedNodes = new Set(); 
     const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
