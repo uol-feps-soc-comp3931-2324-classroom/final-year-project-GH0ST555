@@ -120,7 +120,6 @@ const GridSizeForm = () => {
 
   const handleDilation = async (e) => {
     try {
-      console.log(selectedOrigin);
     const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
       setDilatedData(response.data);
       console.log(response.data);
@@ -187,7 +186,7 @@ const GridSizeForm = () => {
                         <div className='modal'>
                             <div>
                                 <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
-                                <button onClick= {() => {close(); setcustomSE(true)}}> Submit Subgraph </button>
+                                <button onClick= {() => {close(); setcustomSE(true)}}> Submit SE </button>
                             </div>
                           <p>Select the edges/nodes you would want part of the Structuring Element. Selected Elements Turn Red</p>
                           <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
