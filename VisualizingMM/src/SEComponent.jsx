@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 //This is the SE Selector Component.
 //Takes in the data from the endpoint and uses d3 to create a visual of the Structuring Element enclosed in an svg
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
-const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) => {
+const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , selectedOrigin}) => {
   // Reference to the container where the SVG will be appended
   const d3Container = useRef(null);
 
@@ -52,7 +52,7 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) =
         .attr("y1", d => nodes[d.source].y)
         .attr("x2", d => nodes[d.target].x)
         .attr("y2", d => nodes[d.target].y)
-        .attr("stroke", "black")
+        .attr("stroke", d => selectedOrigin && selectedOrigin.type != 'node' && selectedOrigin.id === d.id ? "green" : "black")
         .attr("stroke-width", 3)
         .attr("id", d => d.id)
         .attr("class", "edge")
@@ -67,7 +67,7 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) =
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
         .attr("r", cellSize/4)
-        .attr("fill", "black")
+        .attr("fill", d => selectedOrigin && selectedOrigin.type === 'node' && selectedOrigin.id === d.id ? "green" : "black")
         .attr("class", "node")
         .attr("opacity", d => selectedNodes.includes(d.id) ? 1 : 0);
 
