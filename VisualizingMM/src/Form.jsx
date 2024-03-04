@@ -37,7 +37,7 @@ const GridSizeForm = () => {
 
 
     const options = [
-      'Single Node', 'Horizontal-Edge', 'Vertical-Edge','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge'
+      'Single Node', 'Horizontal-Edge', 'Vertical-Edge','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge', 'Custom SE'
     ];
     const defaultOption = options[0];
 
@@ -120,14 +120,15 @@ const GridSizeForm = () => {
 
   const handleDilation = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
+      console.log(selectedOrigin);
+    const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
       setDilatedData(response.data);
       console.log(response.data);
     } catch (error) {
       console.error('Error Dilating Grid:', error);
     }
   };
-
+ 
 
   const handleErosion = async (e) => {
     try {

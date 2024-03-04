@@ -15,13 +15,20 @@ app.post('/api/grid', (req, res) => {
   const { rows,cols } = req.body;
   const matrix = createAdjacencyMatrix(rows,cols);
   const { nodes, links } = createNodesandEdges(matrix,rows,cols);
-
   res.send({rows,cols,matrix,nodes,links});
 });
 
 app.post('/api/dilateGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
-  res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  const{id,type} = Origin
+  if (SE != 'Custom SE'){
+    res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  }
+  else{
+    // res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,origin,SENodes,SELinks));
+    customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,SENodes,SELinks);
+  }
+  
 
 });
 
@@ -302,6 +309,12 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
     return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
   }
+}
+
+function customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,originid,origintype,SENodes,SELinks){
+  console.log(SENodes);
+  console.log(SELinks);
+  console.log(originid,origintype);
 }
 
 

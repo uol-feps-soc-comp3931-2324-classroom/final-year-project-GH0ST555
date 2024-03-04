@@ -60,7 +60,6 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
             if (safeSelectedLinks.some(link => link.source === d.source && link.target === d.target)){
               const origin = { id: d.id, type: d.edgetype};
               setSelectedOrigin(origin);
-              console.log(selectedOrigin);
             }
          })
          .on("click", function(event, d) {
