@@ -27,6 +27,7 @@ const GridSizeForm = () => {
   const [selectedLinks, setSelectedLinks] = useState([]);
   const [selectedSENodes, setSelectedSENodes] = useState([]);
   const [selectedSELinks, setSelectedSELinks] = useState([]);
+  const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [dilatedData,setDilatedData] = useState(null);
   const [erodedData,setErodedData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
@@ -184,11 +185,11 @@ const GridSizeForm = () => {
                     close => (
                         <div className='modal'>
                             <div>
-                                <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setcustomSE(false);}   }> Close </button>
+                                <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
                                 <button onClick= {() => {close(); setcustomSE(true)}}> Submit Subgraph </button>
                             </div>
                           <p>Select the edges/nodes you would want part of the Structuring Element. Selected Elements Turn Red</p>
-                          <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE"/>
+                          <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
                         </div>
                     )
                 }

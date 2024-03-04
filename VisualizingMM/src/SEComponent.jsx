@@ -79,4 +79,4 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks }) =
   );
 };
 
-export default SESelector;
+export default SEComponent;
