@@ -315,6 +315,9 @@ function customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,origin
   console.log(SENodes);
   console.log(SELinks);
   console.log(originid,origintype);
+  if (origintype == 'Node'){
+    const { rpNodes, rpLinks } = calculatePositionsNC(originNode, SENodes, SELinks, rows, cols);
+  }
 }
 
 
@@ -344,6 +347,42 @@ function getConnectedLinks(nodeId, links) {
   const connectedLinks = links.filter(link => link.source === nodeId || link.target === nodeId);  
   return connectedLinks;
 }
+
+
+
+// Calculate relative positions (When the origin is a node)
+const calculatePositionsNC = (originNode, nodes, links, rows, cols) => {
+  const { row: originRow, col: originCol } = getRowCol(originNode, cols);
+  // Calculate relative positions for nodes
+  const rpNodes = nodes.map(node => {
+    const { row, col } = getRowCol(node, cols);
+    return {
+      nodeId: node,
+      relativePosition: { x: col - originCol, y: row - originRow }
+    };
+  });
+
+  // Calculate relative positions for links
+  const rpLinks = links.map(link => {
+    const { row: sourceRow, col: sourceCol } = getRowCol(link.source, cols);
+    const { row: targetRow, col: targetCol } = getRowCol(link.target, cols);
+    return {
+      linkId: link.id,
+      sourceRelativePosition: { x: sourceCol - originCol, y: sourceRow - originRow },
+      targetRelativePosition: { x: targetCol - originCol, y: targetRow - originRow },
+      edgetype: link.edgetype
+    };
+  });
+
+  return { rpNodes, rpLinks };
+};
+
+// Function to get row and col for a node ID
+const getRowCol = (nodeId, cols) => {
+  const row = Math.floor(nodeId / cols);
+  const col = nodeId % cols;
+  return { row, col };
+};
 
 
 app.listen(port, () => {

@@ -89,7 +89,6 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
           if (safeSelectedNodes.includes(d.id)){
             const origin = { id: d.id, type: 'node' };
             setSelectedOrigin(origin);
-            console.log(selectedOrigin.type);
           }
         })
         .on("click", function(event, d) {
