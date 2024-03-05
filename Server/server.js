@@ -22,7 +22,6 @@ app.post('/api/dilateGrid', (req, res) => {
   const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
   
   if (SE != 'Custom SE'){
-4
     res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
@@ -214,6 +213,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   }
 
   else if (SE == 'Vertical Edge'){
+    console.log('BANG');
     const newSelectedNodes = new Set();
     const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
@@ -356,8 +356,6 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
               (link.source === newSourceId && link.target === newTargetId) 
               //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
             );
-            console.log(existingLink);
-            console.log('n');
       
             // If the link exists, add it to the set of dilated links
             if (existingLink) {
@@ -373,10 +371,9 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
       return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
   }
 
-  else if (originType = 'Horizontal') {
+  else if (originType == 'Horizontal') {
     const parts = originId.split('-');
     const eNode = parseInt(parts[2], 10); // This converts "12" to the integer 12
-    console.log(eNode); // Outputs: 12
 
     ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
     // Prepare new sets to hold the results of dilation
@@ -456,9 +453,6 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
             (link.source === newSourceId && link.target === newTargetId) 
             //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
           );
-          console.log(existingLink);
-          console.log('n');
-    
           // If the link exists, add it to the set of dilated links
           if (existingLink) {
             dilatedLinks.push(existingLink);
@@ -555,10 +549,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           const existingLink = links.find(link => 
             (link.source === newSourceId && link.target === newTargetId) 
             //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
-          );
-          console.log(existingLink);
-          console.log('n');
-    
+          );  
           // If the link exists, add it to the set of dilated links
           if (existingLink) {
             dilatedLinks.push(existingLink);
