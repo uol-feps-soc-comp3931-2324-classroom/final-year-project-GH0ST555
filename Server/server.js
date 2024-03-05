@@ -316,6 +316,7 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType, SENodes, SELinks) {
   // Placeholder for calculatePositions function
   let rpNodes, rpLinks;
+  console.log(originType);
 
   if (originType == 'node') {
     ({ rpNodes, rpLinks } = calculatePositionsNC(originId, SENodes, SELinks, rows, cols));
@@ -370,6 +371,205 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
       const dilatedNodesArray = Array.from(dilatedNodes);
 
       return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
+  }
+
+  else if (originType = 'Horizontal') {
+    const parts = originId.split('-');
+    const eNode = parseInt(parts[2], 10); // This converts "12" to the integer 12
+    console.log(eNode); // Outputs: 12
+
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
+    // Prepare new sets to hold the results of dilation
+    const dilatedNodes = new Set();
+    const dilatedLinks = [];
+
+    // Apply the structuring element to each selected node
+    selectedNodes.forEach(nodeId => {
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      const neighborsR = getNeighbors(nodeId+1,rows,cols);
+      //A node, its neighbour and its edge needs to be present to perfrom dilation in this case
+      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+1) &&  selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)){
+        dilatedNodes.add(nodeId);
+        dilatedNodes.add(nodeId+1);
+        dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
+
+        neighbors.forEach(neighbor => {
+          if (!dilatedNodes.has(neighbor)) {
+            dilatedNodes.add(neighbor);
+          }
+        });
+
+        neighborsR.forEach(neighbor => {
+          if (!dilatedNodes.has(neighbor)) {
+            dilatedNodes.add(neighbor);
+          }
+        });
+
+        //start with left side of this process.
+        //Add all neigbours of the Node
+        const connectedLinks = getConnectedLinks(nodeId, links);
+        connectedLinks.forEach(link => {
+          // Check if the link exists in selectedLinks by comparing link ids
+          const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        
+          // If the link is not already in selectedLinks, add it
+          if (!linkExistsInSelected) {
+            dilatedLinks.push(link);
+          }
+        });
+        
+        const connectedLinksR = getConnectedLinks(nodeId+1, links);
+        connectedLinksR.forEach(link => {
+          const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+          if (!linkExistsInSelectedR) {
+            dilatedLinks.push(link);
+          }
+        });
+
+              // Apply each relative position of SE nodes to the current node
+      rpNodes.forEach(({ relativePosition }) => {
+        const newRow = Math.floor(nodeId / cols) + relativePosition.y;
+        const newCol = nodeId % cols + relativePosition.x;
+        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+          const newNodeId = newRow * cols + newCol;
+          dilatedNodes.add(newNodeId);
+        }
+      });
+
+      // Apply the structuring element's links to each selected node if applicable
+      rpLinks.forEach(({ sourceRelativePosition, targetRelativePosition }) => {
+        // Calculate new positions for source and target
+        const sourceRow = Math.floor(nodeId / cols) + sourceRelativePosition.y;
+        const sourceCol = nodeId % cols + sourceRelativePosition.x;
+        const targetRow = Math.floor(nodeId / cols) + targetRelativePosition.y;
+        const targetCol = nodeId % cols + targetRelativePosition.x;
+    
+        // Ensure both source and target positions are within bounds
+        if (sourceRow >= 0 && sourceRow < rows && sourceCol >= 0 && sourceCol < cols &&
+            targetRow >= 0 && targetRow < rows && targetCol >= 0 && targetCol < cols) {
+          
+          const newSourceId = sourceRow * cols + sourceCol;
+          const newTargetId = targetRow * cols + targetCol;
+    
+          // Check if a link exists between the new source and target
+          const existingLink = links.find(link => 
+            (link.source === newSourceId && link.target === newTargetId) 
+            //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
+          );
+          console.log(existingLink);
+          console.log('n');
+    
+          // If the link exists, add it to the set of dilated links
+          if (existingLink) {
+            dilatedLinks.push(existingLink);
+          }
+        }
+      });
+    }
+
+    });
+    
+    // Convert sets back to arrays for the response
+    const dilatedNodesArray = Array.from(dilatedNodes);
+
+    return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
+  }
+
+  else if (originType =='Vertical'){
+    const parts = originId.split('-');
+    const eNode = parseInt(parts[2], 10); 
+    console.log('Here');
+
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
+    // Prepare new sets to hold the results of dilation
+    const dilatedNodes = new Set();
+    const dilatedLinks = [];
+
+    selectedNodes.forEach(nodeId => {
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      const neighborsB = getNeighbors(nodeId+cols,rows,cols);
+      //A node, its neighbour and its edge needs to be present to perfrom dilation in this case
+      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+cols) && selectedLinks.some(link => link.id === `link-${nodeId+cols}-${nodeId}`)){
+        dilatedNodes.add(nodeId);
+        dilatedNodes.add(nodeId+cols);
+        dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+cols}-${nodeId}`));
+        neighbors.forEach(neighbor => {
+          if (!dilatedNodes.has(neighbor)) {
+            dilatedNodes.add(neighbor);
+          }
+        });
+
+        neighborsB.forEach(neighbor => {
+          if (!dilatedNodes.has(neighbor)) {
+            dilatedNodes.add(neighbor);
+          }
+        });
+
+        //start with left side of this process.
+        //Add all neigbours of the Node
+        const connectedLinks = getConnectedLinks(nodeId, links);
+        connectedLinks.forEach(link => {
+          // Check if the link exists in selectedLinks by comparing link ids
+          const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        
+          // If the link is not already in selectedLinks, add it
+          if (!linkExistsInSelected) {
+            dilatedLinks.push(link);
+          }
+        });
+        
+        const connectedLinksB = getConnectedLinks(nodeId+cols, links);
+        connectedLinksB.forEach(link => {
+          const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+          if (!linkExistsInSelectedR) {
+            dilatedLinks.push(link);
+          }
+        });
+
+      // Apply each relative position of SE nodes to the current node
+      rpNodes.forEach(({ relativePosition }) => {
+        const newRow = Math.floor(nodeId / cols) + relativePosition.y;
+        const newCol = nodeId % cols + relativePosition.x;
+        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+          const newNodeId = newRow * cols + newCol;
+          dilatedNodes.add(newNodeId);
+        }
+      });
+
+      // Apply the structuring element's links to each selected node if applicable
+      rpLinks.forEach(({ sourceRelativePosition, targetRelativePosition }) => {
+        // Calculate new positions for source and target
+        const sourceRow = Math.floor(nodeId / cols) + sourceRelativePosition.y;
+        const sourceCol = nodeId % cols + sourceRelativePosition.x;
+        const targetRow = Math.floor(nodeId / cols) + targetRelativePosition.y;
+        const targetCol = nodeId % cols + targetRelativePosition.x;
+    
+        // Ensure both source and target positions are within bounds
+        if (sourceRow >= 0 && sourceRow < rows && sourceCol >= 0 && sourceCol < cols &&
+            targetRow >= 0 && targetRow < rows && targetCol >= 0 && targetCol < cols) {
+          
+          const newSourceId = sourceRow * cols + sourceCol;
+          const newTargetId = targetRow * cols + targetCol;
+    
+          // Check if a link exists between the new source and target
+          const existingLink = links.find(link => 
+            (link.source === newSourceId && link.target === newTargetId) 
+            //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
+          );
+          console.log(existingLink);
+          console.log('n');
+    
+          // If the link exists, add it to the set of dilated links
+          if (existingLink) {
+            dilatedLinks.push(existingLink);
+          }
+        }
+      });
+    }
+    });
+    // Convert sets back to arrays for the response
+    const dilatedNodesArray = Array.from(dilatedNodes);
+    return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
   }
 }
 
