@@ -58,7 +58,7 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
          .on("contextmenu", (event, d) => {
             event.preventDefault();
             if (safeSelectedLinks.some(link => link.source === d.source && link.target === d.target)){
-              const origin = { id: d.id, type: d.edgetype};
+              const origin = { id: d.id, type: d.edgetype, add:'yes'}; //Edges as an origin always have to be added
               setSelectedOrigin(origin);
             }
          })
@@ -78,7 +78,8 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
         .attr("cy", d => d.y)
         .attr("r", cellSize / 4)
         .attr("fill", d => {
-          if (selectedOrigin && selectedOrigin.type === 'node' && selectedOrigin.id === d.id && safeSelectedNodes.includes(d.id) ) return "green"; // Origin
+          if (selectedOrigin && selectedOrigin.type === 'node' && selectedOrigin.id === d.id && safeSelectedNodes.includes(d.id) )  return "green"; // Origin (will be added when applying)
+          else if (selectedOrigin && selectedOrigin.type === 'node' && selectedOrigin.id === d.id) return "orange"; // Origin (but not to be added when applyting MM)
           else if (safeSelectedNodes.includes(d.id)) return "red"; // Selected but not the origin
           else return "black"; 
         })
@@ -87,7 +88,11 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
         .on("contextmenu", (event, d) => {
           event.preventDefault();
           if (safeSelectedNodes.includes(d.id)){
-            const origin = { id: d.id, type: 'node' };
+            const origin = { id: d.id, type: 'node' ,add: 'yes'};
+            setSelectedOrigin(origin);
+          }
+          else{
+            const origin = { id: d.id, type: 'node' ,add: 'no'};
             setSelectedOrigin(origin);
           }
         })
@@ -97,6 +102,14 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
         const newColor = currentColor === "black" ? "red" : "black";
         d3.select(this).attr("fill", newColor);
         onNodeSelect(d,scenario);
+        if (d.id === selectedOrigin.id){
+          if (selectedOrigin.add == 'yes'){
+            selectedOrigin.add ='No';
+          }
+          else{
+            selectedOrigin.add='yes';
+          }
+        }
       });
 
     }

@@ -67,9 +67,26 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
         .attr("r", cellSize/4)
-        .attr("fill", d => selectedOrigin && selectedOrigin.type === 'node' && selectedOrigin.id === d.id ? "green" : "black")
+        .attr("fill", d => {
+          // Check if the node is the selected origin
+          const isOrigin = selectedOrigin && selectedOrigin.id === d.id;
+          // Check if the node is included in the selected nodes
+          const isSelected = selectedNodes.includes(d.id);
+        
+          if (isOrigin && isSelected) {
+            // If the node is the origin and selected, make it green
+            return "green";
+          } else if (isOrigin && !isSelected) {
+            // If the node is the origin but not selected, make it yellow
+            return "yellow";
+          } else {
+            // If the node is not the origin, keep it black
+            return "black";
+          }
+        })
+        
         .attr("class", "node")
-        .attr("opacity", d => selectedNodes.includes(d.id) ? 1 : 0);
+        .attr("opacity", d => selectedNodes.includes(d.id) || selectedOrigin.id === d.id ? 1 : 0);
 
     }
   }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes

@@ -25,9 +25,9 @@ app.post('/api/dilateGrid', (req, res) => {
     res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    const{id,type} = Origin
+    const{id,type,add} = Origin
     // res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,origin,SENodes,SELinks));
-    res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,SENodes,SELinks));
+    res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
   }
   
 
@@ -96,7 +96,7 @@ function createNodesandEdges(matrix, rows, cols) {
   return { nodes, links };
 }
 
-//perform dilation
+//perform dilation on predefined cases
 //The idea is to match the orign SE to elemtents of the subgraph
 //if there is match, the SE is added to the subgraph
 function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
@@ -311,9 +311,11 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     const dilatedSelectedNodes = Array.from(newSelectedNodes);
     return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
   }
+
+  // else if (SE)
 }
 
-function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType, SENodes, SELinks) {
+function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks) {
   // Placeholder for calculatePositions function
   let rpNodes, rpLinks;
   console.log(originType);
@@ -330,7 +332,8 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         rpNodes.forEach(({ relativePosition }) => {
           const newRow = Math.floor(nodeId / cols) + relativePosition.y;
           const newCol = nodeId % cols + relativePosition.x;
-          if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes')
+          if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && addNode) {
             const newNodeId = newRow * cols + newCol;
             dilatedNodes.add(newNodeId);
           }
@@ -364,7 +367,6 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           }
         });
       });
-      
       // Convert sets back to arrays for the response
       const dilatedNodesArray = Array.from(dilatedNodes);
 
@@ -423,7 +425,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           }
         });
 
-              // Apply each relative position of SE nodes to the current node
+      // Apply each relative position of SE nodes to the current node
       rpNodes.forEach(({ relativePosition }) => {
         const newRow = Math.floor(nodeId / cols) + relativePosition.y;
         const newCol = nodeId % cols + relativePosition.x;
