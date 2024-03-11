@@ -144,7 +144,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
           newSelectedNodes.add(nodeId+1);
           const linkbwNodes = `link-${nodeId+1}-${nodeId}`
           const linkObject = links.find(link => link.id === linkbwNodes);
-          if (linkObject != null && !selectedLinks.some(link => link.id === linkbwNodes)) {
+          if (linkObject != null) {
             dilatedLinks.push(linkObject); 
           }
       }
@@ -153,7 +153,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
       else if(neighbors.includes(nodeId+1) && newSelectedNodes.has(nodeId+1)){
         const linkbwNodes = `link-${nodeId+1}-${nodeId}`
         const linkObject = links.find(link => link.id === linkbwNodes);
-        if (linkObject!= null && !selectedLinks.some(link => link.id === linkbwNodes)) {
+        if (linkObject!= null && selectedLinks && !selectedLinks.some(link => link.id === linkbwNodes)) {
           dilatedLinks.push(linkObject); 
         }
     }
@@ -168,7 +168,6 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 
 
   else if (SE == 'Horizontal Edge'){
-    console.log('HUH?');
     const newSelectedNodes = new Set(); 
     const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
@@ -220,7 +219,6 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   }
 
   else if (SE == 'Vertical Edge'){
-    console.log('BANG');
     const newSelectedNodes = new Set();
     const dilatedLinks = [];
     selectedNodes.forEach(nodeId => {
@@ -329,14 +327,13 @@ function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     return { resultNodes: selectedNodes, resultdLinks: null }
   }
   //Note that we dont need more conditional statements. remove this when the erosion for the hard coded cases are complete
-  else if (SE == 'cross shaped(No Edges)'){
     const{erodedNodes,erodedLinks} = erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE);
-    const{resultNodes,resultLinks} = dilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SE);
-
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
-  }
+    const{dilatedNodes,dilatedLinks} = dilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SE);
+    return { resultNodes: dilatedNodes, resultLinks: dilatedLinks };
 }
 
+
+//A custom dilation when the user inputs their own structuring element
 function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks) {
   // Placeholder for calculatePositions function
   let rpNodes, rpLinks;
@@ -473,10 +470,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           const newTargetId = targetRow * cols + targetCol;
     
           // Check if a link exists between the new source and target
-          const existingLink = links.find(link => 
-            (link.source === newSourceId && link.target === newTargetId) 
-            //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
-          );
+          const existingLink = links.find(link => (link.source === newSourceId && link.target === newTargetId) );
           // If the link exists, add it to the set of dilated links
           if (existingLink) {
             dilatedLinks.push(existingLink);
@@ -570,10 +564,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           const newTargetId = targetRow * cols + targetCol;
     
           // Check if a link exists between the new source and target
-          const existingLink = links.find(link => 
-            (link.source === newSourceId && link.target === newTargetId) 
-            //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
-          );  
+          const existingLink = links.find(link => (link.source === newSourceId && link.target === newTargetId));  
           // If the link exists, add it to the set of dilated links
           if (existingLink) {
             dilatedLinks.push(existingLink);

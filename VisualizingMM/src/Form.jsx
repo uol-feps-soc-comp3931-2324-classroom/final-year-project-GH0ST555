@@ -38,7 +38,7 @@ const GridSizeForm = () => {
 
 
     const options = [
-      'Single Node', 'Horizontal-Edge', 'Vertical-Edge','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge', 'Custom SE'
+      'Single Node','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge', 'Custom SE'
     ];
     const defaultOption = options[0];
 
@@ -157,6 +157,7 @@ const GridSizeForm = () => {
       await handleErosion();
     }
     else if(selectedMMop == "Opening"){
+      console.log('BB');
       await handleOpening();
     } else {
       console.log("No operation or unrecognized operation selected");
@@ -227,7 +228,6 @@ const GridSizeForm = () => {
         <SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} selectedOrigin={selectedOrigin} />  
         </>
       )}
-
 
       {dilatedData && (
               <>

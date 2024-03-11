@@ -2,14 +2,10 @@
 
 .modal {
   width: auto;
-  min-width: 760px; /* Slightly larger than the SVG to account for padding/margins */
   height: auto;
-  min-height: 760px; /* As above */
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px; /* Adjust based on your design */
   box-sizing: border-box; /* Ensures padding doesn't add to the width */
-  overflow: scroll;
+  overflow: scroll !important;
 }
