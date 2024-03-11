@@ -11,4 +11,5 @@
   align-items: center;
   padding: 20px; /* Adjust based on your design */
   box-sizing: border-box; /* Ensures padding doesn't add to the width */
+  overflow: scroll;
 }

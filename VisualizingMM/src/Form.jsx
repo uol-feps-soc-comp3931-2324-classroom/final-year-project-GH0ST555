@@ -30,6 +30,7 @@ const GridSizeForm = () => {
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [dilatedData,setDilatedData] = useState(null);
   const [erodedData,setErodedData] = useState(null);
+  const [openData,setOpenData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
 
   const [selectedOption, setSelectedOption] = useState("Single Node");
@@ -42,7 +43,7 @@ const GridSizeForm = () => {
     const defaultOption = options[0];
 
     const MMoperation = [
-      'Dilation', 'Erosion'
+      'Dilation', 'Erosion','Opening','Closing'
     ];
     const defaultMMOpertaion = MMoperation[0];
 
@@ -139,11 +140,24 @@ const GridSizeForm = () => {
     }
   };
 
+  const handleOpening = async (e) => {
+    try {
+      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
+      setOpenData(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error Opening Grid:', error);
+    }
+  };
+
   const handleOperationClick = async () => {
     if (selectedMMop === "Dilation") {
       await handleDilation();
     } else if (selectedMMop === "Erosion") {
       await handleErosion();
+    }
+    else if(selectedMMop == "Opening"){
+      await handleOpening();
     } else {
       console.log("No operation or unrecognized operation selected");
     }
@@ -224,9 +238,15 @@ const GridSizeForm = () => {
       {erodedData && (
               <>
               <p>This Is The Eroded Data</p>
-              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.dilatedNodes} selectedLinks={erodedData.dilatedLinks} /> 
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.erodedNodes} selectedLinks={erodedData.erodedLinks} /> 
               </>
-            )}   
+            )}
+      {openData && (
+              <>
+              <p>This Is The Data after opening</p>
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={openData.resultNodes} selectedLinks={openData.resultLinks} /> 
+              </>
+            )}      
     </div>
   );
 };

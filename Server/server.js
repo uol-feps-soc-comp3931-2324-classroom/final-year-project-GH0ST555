@@ -16,6 +16,10 @@ app.post('/api/grid', (req, res) => {
   const matrix = createAdjacencyMatrix(rows,cols);
   const { nodes, links } = createNodesandEdges(matrix,rows,cols);
   res.send({rows,cols,matrix,nodes,links});
+  // console.log(matrix);
+  // console.log("Nodes:", nodes);
+  // console.log("Edges:", links);  
+  
 });
 
 app.post('/api/dilateGrid', (req, res) => {
@@ -26,7 +30,6 @@ app.post('/api/dilateGrid', (req, res) => {
   }
   else{
     const{id,type,add} = Origin
-    // res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,origin,SENodes,SELinks));
     res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
   }
   
@@ -36,6 +39,11 @@ app.post('/api/dilateGrid', (req, res) => {
 app.post('/api/erodeGrid', (req, res) => {
   const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
   res.json(erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+});
+
+app.post('/api/openGrid', (req, res) => {
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
+  res.json(opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
 });
 
 
@@ -134,10 +142,9 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
       // if R neighbour exists and not present in the selected nodes 
       if(neighbors.includes(nodeId+1) && !newSelectedNodes.has(nodeId+1)){
           newSelectedNodes.add(nodeId+1);
-          dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
           const linkbwNodes = `link-${nodeId+1}-${nodeId}`
           const linkObject = links.find(link => link.id === linkbwNodes);
-          if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
+          if (linkObject != null && !selectedLinks.some(link => link.id === linkbwNodes)) {
             dilatedLinks.push(linkObject); 
           }
       }
@@ -146,7 +153,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
       else if(neighbors.includes(nodeId+1) && newSelectedNodes.has(nodeId+1)){
         const linkbwNodes = `link-${nodeId+1}-${nodeId}`
         const linkObject = links.find(link => link.id === linkbwNodes);
-        if (linkObject && !selectedLinks.some(link => link.id === linkbwNodes)) {
+        if (linkObject!= null && !selectedLinks.some(link => link.id === linkbwNodes)) {
           dilatedLinks.push(linkObject); 
         }
     }
@@ -269,7 +276,7 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 // Takes in Similar params like the dilation function and returns similar output, making it consitent and helps with rendering client side
 function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   if (SE == 'Single Node'){
-    return { dilatedNodes: selectedNodes, dilatedLinks: null }
+    return { erodedNodes: selectedNodes, erodedLinks: null }
   }
   else if (SE == 'cross shaped(No Edges)'){
     const newSelectedNodes = new Set(); // Use a Set for efficient lookups and to avoid duplicates
@@ -290,8 +297,8 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     });
 
     // Convert the Set back to an array for the response
-    const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
+    const erodedSelectedNodes = Array.from(newSelectedNodes);
+    return { erodedNodes: erodedSelectedNodes, erodedLinks: null };
 
   }
 
@@ -308,11 +315,26 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
       }
     });
     // Convert the Set back to an array for the response
-    const dilatedSelectedNodes = Array.from(newSelectedNodes);
-    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
+    const erodedSelectedNodes = Array.from(newSelectedNodes);
+    return { erodedNodes: erodedSelectedNodes, erodedLinks: null };
   }
 
   // else if (SE)
+}
+
+//erosion followed by dilation results in opening
+//This function is for preset cases
+function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
+  if (SE == 'Single Node'){
+    return { resultNodes: selectedNodes, resultdLinks: null }
+  }
+  //Note that we dont need more conditional statements. remove this when the erosion for the hard coded cases are complete
+  else if (SE == 'cross shaped(No Edges)'){
+    const{erodedNodes,erodedLinks} = erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE);
+    const{resultNodes,resultLinks} = dilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SE);
+
+    return { dilatedNodes: dilatedSelectedNodes, dilatedLinks: null };
+  }
 }
 
 function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks) {

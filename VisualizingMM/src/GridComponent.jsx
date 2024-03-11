@@ -58,7 +58,7 @@ const GridComponent = ({ rows, cols, nodes, links }) => {
         .attr("class", "node");
 
     }
-  }, [nodes, links, rows, cols]); // Updated dependency array
+  }, [nodes, links, rows, cols]); // Updated dependency array, Reruns when any of the values change
 
   return <div ref={d3Container} />;
 };
