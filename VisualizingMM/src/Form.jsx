@@ -132,7 +132,7 @@ const GridSizeForm = () => {
 
   const handleErosion = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
+      const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
       setErodedData(response.data);
       console.log(response.data);
     } catch (error) {
@@ -142,7 +142,7 @@ const GridSizeForm = () => {
 
   const handleOpening = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption});
+      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
       setOpenData(response.data);
       console.log(response.data);
     } catch (error) {

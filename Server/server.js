@@ -37,13 +37,27 @@ app.post('/api/dilateGrid', (req, res) => {
 });
 
 app.post('/api/erodeGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
-  res.json(erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  if(SE != 'Custom SE'){
+    res.json(erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  }
+  else{
+    const{id,type,add} = Origin;
+    res.json(customErosion(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
+  }
+  
 });
 
 app.post('/api/openGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE } = req.body;
-  res.json(opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  if(SE != 'Custom SE'){
+    res.json(opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  }
+  else{
+    const{id,type,add} = Origin;
+    //todo
+    // res.json(customOpening(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
+  }
 });
 
 
@@ -282,7 +296,6 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     return {erodedNodes: nodesArray,erodedLinks: links}
   }
   if (SE == 'Single Node'){
-    console.log('K');
     return { erodedNodes: selectedNodes, erodedLinks: null }
   }
   else if (SE == 'cross shaped(No Edges)'){
@@ -696,7 +709,75 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
 //a function that handles erosion when the SE is user inputted
 function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks)
 {
-  return null;
+  let rpNodes, rpLinks;
+  // if the subgraph is null, the whole grid will now be the result
+  if(selectedNodes.length == 0 && selectedLinks.length == 0){
+    const nodesArray = [];
+    nodes.forEach(nodeId => {
+      nodesArray.push(nodeId.id);
+    });
+    return {erodedNodes: nodesArray,erodedLinks: links}
+  }
+
+  else if (originType =='node'){
+    ({ rpNodes, rpLinks } = calculatePositionsNC(originId, SENodes, SELinks, rows, cols));
+      // Prepare new sets to hold the results of dilation
+      const erodedNodes = [];
+      const erodedLinks = [];
+
+      // We see all selected nodes to check if the SE is within the subgraph
+      selectedNodes.forEach(nodeId => {
+        let add_flag = true;
+        // Apply each relative position of SE nodes to the current node
+        rpNodes.forEach(({ relativePosition }) => {
+          const newRow = Math.floor(nodeId / cols) + relativePosition.y;
+          const newCol = nodeId % cols + relativePosition.x;
+          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes')
+          if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && addNode) { //to check if within bounds
+            const newNodeId = newRow * cols + newCol;
+            if (!selectedNodes.includes(newNodeId)){ // check if the relative node is within the subgraph
+              add_flag = false
+            }
+          }
+          else{
+            add_flag = false;
+          }
+        });
+
+        // Apply the structuring element's links to each selected node if applicable
+        rpLinks.forEach(({ sourceRelativePosition, targetRelativePosition }) => {
+          // Calculate new positions for source and target
+          const sourceRow = Math.floor(nodeId / cols) + sourceRelativePosition.y;
+          const sourceCol = nodeId % cols + sourceRelativePosition.x;
+          const targetRow = Math.floor(nodeId / cols) + targetRelativePosition.y;
+          const targetCol = nodeId % cols + targetRelativePosition.x;
+      
+          // Ensure both source and target positions are within bounds
+          if (sourceRow >= 0 && sourceRow < rows && sourceCol >= 0 && sourceCol < cols &&
+              targetRow >= 0 && targetRow < rows && targetCol >= 0 && targetCol < cols) {
+            
+            const newSourceId = sourceRow * cols + sourceCol;
+            const newTargetId = targetRow * cols + targetCol;
+      
+            // Check if a link exists between the new source and target
+            const existingLink = selectedLinks.some(link => (link.source === newSourceId && link.target === newTargetId));
+      
+            // If the link doesn't exist, set the flag to false
+            if (!existingLink) {
+             add_flag = false;
+            }
+          }
+        });
+        // console.log(add_flag);
+        //if all the nodes and edges are within the subgaph we add that node
+        if (add_flag == true){
+          erodedNodes.push(nodeId);
+        }
+      });
+
+      return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
+
+  }
 }
 
 //given a node and the structure of the grid,
