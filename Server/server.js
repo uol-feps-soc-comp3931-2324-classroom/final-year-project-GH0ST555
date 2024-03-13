@@ -273,6 +273,11 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 //The idea behind erosion is to find the largest portion of the subgraph when dilated with the SE does not exceed the sturcture of the subgraph
 // Takes in Similar params like the dilation function and returns similar output, making it consitent and helps with rendering client side
 function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
+  // if the subgraph is null, the whole grid will now be the result
+  if(selectedNodes == null && selectedLinks == null){ 
+    return {erodedNodes: nodes,erodedNodes: links}
+
+  }
   if (SE == 'Single Node'){
     return { erodedNodes: selectedNodes, erodedLinks: null }
   }
@@ -317,7 +322,64 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
     return { erodedNodes: erodedSelectedNodes, erodedLinks: null };
   }
 
-  // else if (SE)
+  else if (SE == 'Horizontal Edge') {
+    const erodedNodes = [];
+    const erodedLinks = [];
+    // console.log(selectedNodes);
+    // console.log(selectedLinks);
+    selectedNodes.forEach(nodeId => {
+        let add_flag = true;
+        let count = 0;
+        let countr = 0;
+        const neighbors = getNeighbors(nodeId, rows, cols);
+        const neighborsR = getNeighbors(nodeId + 1, rows, cols);
+        //A node, its neighbour and its edge needs to be present to perform dilation in this case
+        if (neighbors.includes(nodeId + 1) && selectedNodes.includes(nodeId + 1) && selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)) {
+          neighbors.forEach(neighbor => {
+              if (!selectedNodes.includes(neighbor)) {
+                  add_flag = false;
+              }
+          });
+
+          neighborsR.forEach(neighbor => {
+              if (!selectedNodes.includes(neighbor)) {
+                  add_flag = false;
+              }
+          });
+            
+        //start with left side of this process.
+        //Add all neigbours of the Node
+        const connectedLinks = getConnectedLinks(nodeId, links);
+        console.log(connectedLinks);
+        connectedLinks.forEach(link => {
+          // Check if the link exists in selectedLinks by comparing link ids
+          console.log(selectedLinks.find(selectedLink => selectedLink.id === link.id));
+          const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        
+          // If the link is not already in selectedLinks, add it
+          if (linkExistsInSelected) {
+            count = count + 1;
+          }
+        });
+        
+        const connectedLinksR = getConnectedLinks(nodeId+1, links);
+        connectedLinksR.forEach(link => {
+          const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+          if (linkExistsInSelectedR) {
+           countr = countr + 1
+          }
+        });
+        console.log(add_flag && count==4 && countr == 4);
+        if (add_flag === true) {
+            erodedNodes.push(nodeId);
+            erodedNodes.push(nodeId + 1);
+            erodedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId + 1}-${nodeId}`));
+        }
+        }
+    });
+    return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
+}
+
 }
 
 //erosion followed by dilation results in opening
@@ -374,10 +436,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
             const newTargetId = targetRow * cols + targetCol;
       
             // Check if a link exists between the new source and target
-            const existingLink = links.find(link => 
-              (link.source === newSourceId && link.target === newTargetId) 
-              //  (link.source === newTargetId && link.target === newSourceId) // Depending on if your graph is directed or undirected
-            );
+            const existingLink = links.find(link => (link.source === newSourceId && link.target === newTargetId) );
       
             // If the link exists, add it to the set of dilated links
             if (existingLink) {
@@ -411,38 +470,38 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         dilatedNodes.add(nodeId+1);
         dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
 
-        neighbors.forEach(neighbor => {
-          if (!dilatedNodes.has(neighbor)) {
-            dilatedNodes.add(neighbor);
-          }
-        });
+        // neighbors.forEach(neighbor => {
+        //   if (!dilatedNodes.has(neighbor)) {
+        //     dilatedNodes.add(neighbor);
+        //   }
+        // });
 
-        neighborsR.forEach(neighbor => {
-          if (!dilatedNodes.has(neighbor)) {
-            dilatedNodes.add(neighbor);
-          }
-        });
+        // neighborsR.forEach(neighbor => {
+        //   if (!dilatedNodes.has(neighbor)) {
+        //     dilatedNodes.add(neighbor);
+        //   }
+        // });
 
-        //start with left side of this process.
-        //Add all neigbours of the Node
-        const connectedLinks = getConnectedLinks(nodeId, links);
-        connectedLinks.forEach(link => {
-          // Check if the link exists in selectedLinks by comparing link ids
-          const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        // //start with left side of this process.
+        // //Add all neigbours of the Node
+        // const connectedLinks = getConnectedLinks(nodeId, links);
+        // connectedLinks.forEach(link => {
+        //   // Check if the link exists in selectedLinks by comparing link ids
+        //   const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
         
-          // If the link is not already in selectedLinks, add it
-          if (!linkExistsInSelected) {
-            dilatedLinks.push(link);
-          }
-        });
+        //   // If the link is not already in selectedLinks, add it
+        //   if (!linkExistsInSelected) {
+        //     dilatedLinks.push(link);
+        //   }
+        // });
         
-        const connectedLinksR = getConnectedLinks(nodeId+1, links);
-        connectedLinksR.forEach(link => {
-          const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-          if (!linkExistsInSelectedR) {
-            dilatedLinks.push(link);
-          }
-        });
+        // const connectedLinksR = getConnectedLinks(nodeId+1, links);
+        // connectedLinksR.forEach(link => {
+        //   const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        //   if (!linkExistsInSelectedR) {
+        //     dilatedLinks.push(link);
+        //   }
+        // });
 
       // Apply each relative position of SE nodes to the current node
       rpNodes.forEach(({ relativePosition }) => {
@@ -505,38 +564,39 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         dilatedNodes.add(nodeId);
         dilatedNodes.add(nodeId+cols);
         dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+cols}-${nodeId}`));
-        neighbors.forEach(neighbor => {
-          if (!dilatedNodes.has(neighbor)) {
-            dilatedNodes.add(neighbor);
-          }
-        });
-
-        neighborsB.forEach(neighbor => {
-          if (!dilatedNodes.has(neighbor)) {
-            dilatedNodes.add(neighbor);
-          }
-        });
-
-        //start with left side of this process.
-        //Add all neigbours of the Node
-        const connectedLinks = getConnectedLinks(nodeId, links);
-        connectedLinks.forEach(link => {
-          // Check if the link exists in selectedLinks by comparing link ids
-          const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
         
-          // If the link is not already in selectedLinks, add it
-          if (!linkExistsInSelected) {
-            dilatedLinks.push(link);
-          }
-        });
+        // neighbors.forEach(neighbor => {
+        //   if (!dilatedNodes.has(neighbor)) {
+        //     dilatedNodes.add(neighbor);
+        //   }
+        // });
+
+        // neighborsB.forEach(neighbor => {
+        //   if (!dilatedNodes.has(neighbor)) {
+        //     dilatedNodes.add(neighbor);
+        //   }
+        // });
+
+        // //start with left side of this process.
+        // //Add all neigbours of the Node
+        // const connectedLinks = getConnectedLinks(nodeId, links);
+        // connectedLinks.forEach(link => {
+        //   // Check if the link exists in selectedLinks by comparing link ids
+        //   const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
         
-        const connectedLinksB = getConnectedLinks(nodeId+cols, links);
-        connectedLinksB.forEach(link => {
-          const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-          if (!linkExistsInSelectedR) {
-            dilatedLinks.push(link);
-          }
-        });
+        //   // If the link is not already in selectedLinks, add it
+        //   if (!linkExistsInSelected) {
+        //     dilatedLinks.push(link);
+        //   }
+        // });
+        
+        // const connectedLinksB = getConnectedLinks(nodeId+cols, links);
+        // connectedLinksB.forEach(link => {
+        //   const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        //   if (!linkExistsInSelectedR) {
+        //     dilatedLinks.push(link);
+        //   }
+        // });
 
       // Apply each relative position of SE nodes to the current node
       rpNodes.forEach(({ relativePosition }) => {
