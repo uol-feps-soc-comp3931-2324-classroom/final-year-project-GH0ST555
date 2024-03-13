@@ -350,10 +350,8 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         //start with left side of this process.
         //Add all neigbours of the Node
         const connectedLinks = getConnectedLinks(nodeId, links);
-        console.log(connectedLinks);
         connectedLinks.forEach(link => {
           // Check if the link exists in selectedLinks by comparing link ids
-          console.log(selectedLinks.find(selectedLink => selectedLink.id === link.id));
           const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
         
           // If the link is not already in selectedLinks, add it
@@ -369,8 +367,7 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
            countr = countr + 1
           }
         });
-        console.log(add_flag && count==4 && countr == 4);
-        if (add_flag === true) {
+        if (add_flag === true  && count==4 && countr == 4) {
             erodedNodes.push(nodeId);
             erodedNodes.push(nodeId + 1);
             erodedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId + 1}-${nodeId}`));
@@ -378,6 +375,60 @@ function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
         }
     });
     return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
+}
+
+else if (SE == 'Vertical Edge') {
+  const erodedNodes = [];
+  const erodedLinks = [];
+  selectedNodes.forEach(nodeId => {
+      let add_flag = true;
+      let count = 0;
+      let countr = 0;
+      const neighbors = getNeighbors(nodeId, rows, cols);
+      const neighborsR = getNeighbors(nodeId + cols, rows, cols);
+      //A node, its neighbour and its edge needs to be present to perform dilation in this case
+      if (neighbors.includes(nodeId + 1) && selectedNodes.includes(nodeId + cols) && selectedLinks.some(link => link.id === `link-${nodeId+cols}-${nodeId}`)) {
+        neighbors.forEach(neighbor => {
+            if (!selectedNodes.includes(neighbor)) {
+                add_flag = false;
+            }
+        });
+
+        neighborsR.forEach(neighbor => {
+            if (!selectedNodes.includes(neighbor)) {
+                add_flag = false;
+            }
+        });
+          
+      //start with left side of this process.
+      //Add all neigbours of the Node
+      const connectedLinks = getConnectedLinks(nodeId, links);
+      connectedLinks.forEach(link => {
+        // Check if the link exists in selectedLinks by comparing link ids
+        console.log(selectedLinks.find(selectedLink => selectedLink.id === link.id));
+        const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+      
+        // If the link is not already in selectedLinks, add it
+        if (linkExistsInSelected) {
+          count = count + 1;
+        }
+      });
+      
+      const connectedLinksR = getConnectedLinks(nodeId+cols, links);
+      connectedLinksR.forEach(link => {
+        const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
+        if (linkExistsInSelectedR) {
+         countr = countr + 1
+        }
+      });
+      if (add_flag === true  && count==4 && countr == 4) {
+          erodedNodes.push(nodeId);
+          erodedNodes.push(nodeId + cols);
+          erodedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId + cols}-${nodeId}`));
+      }
+      }
+  });
+  return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
 }
 
 }
