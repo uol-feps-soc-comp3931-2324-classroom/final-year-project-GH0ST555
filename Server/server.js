@@ -274,11 +274,15 @@ function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 // Takes in Similar params like the dilation function and returns similar output, making it consitent and helps with rendering client side
 function erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
   // if the subgraph is null, the whole grid will now be the result
-  if(selectedNodes == null && selectedLinks == null){ 
-    return {erodedNodes: nodes,erodedNodes: links}
-
+  if(selectedNodes.length == 0 && selectedLinks.length == 0){
+    const nodesArray = [];
+    nodes.forEach(nodeId => {
+      nodesArray.push(nodeId.id);
+    });
+    return {erodedNodes: nodesArray,erodedLinks: links}
   }
   if (SE == 'Single Node'){
+    console.log('K');
     return { erodedNodes: selectedNodes, erodedLinks: null }
   }
   else if (SE == 'cross shaped(No Edges)'){
@@ -450,7 +454,6 @@ function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks) {
   // Placeholder for calculatePositions function
   let rpNodes, rpLinks;
-  console.log(originType);
 
   if (originType == 'node') {
     ({ rpNodes, rpLinks } = calculatePositionsNC(originId, SENodes, SELinks, rows, cols));
@@ -504,7 +507,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
 
   else if (originType == 'Horizontal') {
     const parts = originId.split('-');
-    const eNode = parseInt(parts[2], 10); // This converts "12" to the integer 12
+    const eNode = parseInt(parts[2], 10); // This converts string to integer
 
     ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
     // Prepare new sets to hold the results of dilation
@@ -599,8 +602,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
 
   else if (originType =='Vertical'){
     const parts = originId.split('-');
-    const eNode = parseInt(parts[2], 10); 
-    console.log('Here');
+    const eNode = parseInt(parts[2], 10); //string to integer conversion 
 
     ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
     // Prepare new sets to hold the results of dilation
@@ -684,13 +686,18 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
       });
     }
     });
+
     // Convert sets back to arrays for the response
     const dilatedNodesArray = Array.from(dilatedNodes);
     return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
   }
 }
 
-
+//a function that handles erosion when the SE is user inputted
+function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks)
+{
+  return null;
+}
 
 //given a node and the structure of the grid,
 //Retrieves all possible neighbours in the form of an array
