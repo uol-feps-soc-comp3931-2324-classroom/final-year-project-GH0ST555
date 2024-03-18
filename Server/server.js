@@ -33,7 +33,6 @@ app.post('/api/dilateGrid', (req, res) => {
     res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
   }
   
-
 });
 
 app.post('/api/erodeGrid', (req, res) => {
@@ -732,7 +731,7 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
         rpNodes.forEach(({ relativePosition }) => {
           const newRow = Math.floor(nodeId / cols) + relativePosition.y;
           const newCol = nodeId % cols + relativePosition.x;
-          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes')
+          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes') // clarify with DR Stell 
           if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && addNode) { //to check if within bounds
             const newNodeId = newRow * cols + newCol;
             if (!selectedNodes.includes(newNodeId)){ // check if the relative node is within the subgraph
@@ -777,6 +776,142 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
 
       return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
 
+  }
+
+  else if (originType == 'Horizontal') {
+    const parts = originId.split('-');
+    const eNode = parseInt(parts[2], 10); // This converts string to integer
+
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
+    // Prepare new sets to hold the results of dilation
+    const erodedNodes = [];
+    const erodedLinks = [];
+
+    // Apply the structuring element to each selected node
+    selectedNodes.forEach(nodeId => {
+      let add_flag = true;
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      const neighborsR = getNeighbors(nodeId+1,rows,cols);
+      //A node, its neighbour and its edge needs to be present to perfrom erosion in this case
+      if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+1) &&  selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)){
+
+      // Apply each relative position of SE nodes to the current node
+      rpNodes.forEach(({ relativePosition }) => {
+        const newRow = Math.floor(nodeId / cols) + relativePosition.y;
+        const newCol = nodeId % cols + relativePosition.x;
+        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols ) { //to check if within bounds
+          const newNodeId = newRow * cols + newCol;
+          if (!selectedNodes.includes(newNodeId)){ // check if the relative node is within the subgraph
+            add_flag = false
+          }
+        }
+        else{
+          add_flag = false;
+        }
+      });
+
+      // Apply the structuring element's links to each selected node if applicable
+      rpLinks.forEach(({ sourceRelativePosition, targetRelativePosition }) => {
+        // Calculate new positions for source and target
+        const sourceRow = Math.floor(nodeId / cols) + sourceRelativePosition.y;
+        const sourceCol = nodeId % cols + sourceRelativePosition.x;
+        const targetRow = Math.floor(nodeId / cols) + targetRelativePosition.y;
+        const targetCol = nodeId % cols + targetRelativePosition.x;
+    
+        // Ensure both source and target positions are within bounds
+        if (sourceRow >= 0 && sourceRow < rows && sourceCol >= 0 && sourceCol < cols &&
+            targetRow >= 0 && targetRow < rows && targetCol >= 0 && targetCol < cols) {
+          
+          const newSourceId = sourceRow * cols + sourceCol;
+          const newTargetId = targetRow * cols + targetCol;
+    
+          // Check if a link exists between the new source and target
+          const existingLink = links.find(link => (link.source === newSourceId && link.target === newTargetId) );
+          // If the link does not exist, set the add flag to false
+          if (!existingLink) {
+            add_flag = false;
+          }
+        }
+      });
+
+      if (add_flag == true){
+        erodedNodes.push(nodeId);
+        erodedNodes.push(nodeId+1);
+        erodedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
+      }
+    }
+
+    });
+    
+    return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
+  }
+
+  else if (originType == 'Vertical') {
+    const parts = originId.split('-');
+    const eNode = parseInt(parts[2], 10); // This converts string to integer
+
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
+    // Prepare new sets to hold the results of dilation
+    const erodedNodes = [];
+    const erodedLinks = [];
+
+    // Apply the structuring element to each selected node
+    selectedNodes.forEach(nodeId => {
+      let add_flag = true;
+      const neighbors = getNeighbors(nodeId,rows,cols);
+      const neighborsR = getNeighbors(nodeId+1,rows,cols);
+      //A node, its neighbour and its edge needs to be present to perfrom erosion in this case
+      if(neighbors.includes(nodeId+cols) && selectedNodes.includes(nodeId+cols) &&  selectedLinks.some(link => link.id === `link-${nodeId+cols}-${nodeId}`)){
+
+      // Apply each relative position of SE nodes to the current node
+      rpNodes.forEach(({ relativePosition }) => {
+        const newRow = Math.floor(nodeId / cols) + relativePosition.y;
+        const newCol = nodeId % cols + relativePosition.x;
+        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols ) { //to check if within bounds
+          const newNodeId = newRow * cols + newCol;
+          if (!selectedNodes.includes(newNodeId)){ // check if the relative node is within the subgraph
+            add_flag = false
+          }
+        }
+        else{
+          add_flag = false;
+        }
+      });
+
+      // Apply the structuring element's links to each selected node if applicable
+      rpLinks.forEach(({ sourceRelativePosition, targetRelativePosition }) => {
+        // Calculate new positions for source and target
+        const sourceRow = Math.floor(nodeId / cols) + sourceRelativePosition.y;
+        const sourceCol = nodeId % cols + sourceRelativePosition.x;
+        const targetRow = Math.floor(nodeId / cols) + targetRelativePosition.y;
+        const targetCol = nodeId % cols + targetRelativePosition.x;
+    
+        // Ensure both source and target positions are within bounds
+        if (sourceRow >= 0 && sourceRow < rows && sourceCol >= 0 && sourceCol < cols &&
+            targetRow >= 0 && targetRow < rows && targetCol >= 0 && targetCol < cols) {
+          
+          const newSourceId = sourceRow * cols + sourceCol;
+          const newTargetId = targetRow * cols + targetCol;
+    
+          // Check if a link exists between the new source and target
+          const existingLink = links.find(link => (link.source === newSourceId && link.target === newTargetId) );
+          // If the link does not exist, set the add flag to false
+          if (!existingLink) {
+            add_flag = false;
+          }
+        }
+      });
+
+      if (add_flag == true){
+        erodedNodes.push(nodeId);
+        erodedNodes.push(nodeId+cols);
+        erodedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+cols}-${nodeId}`));
+      }
+    }
+
+    });
+    
+    return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
   }
 }
 

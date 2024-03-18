@@ -9,3 +9,33 @@
   box-sizing: border-box; /* Ensures padding doesn't add to the width */
   overflow: scroll !important;
 }
+
+.Graphs {
+  width: auto;
+  height: auto;
+  max-width: 90vw !important;
+  display: flex;
+  flex-direction: row; /* Change to row to align children horizontally */
+  box-sizing: border-box; /* Ensures padding doesn't add to the width */
+  align-items: start; /* Align items to the start of the flex container */
+  gap: 20px; /* Adds some space between each child component */
+}
+
+/* Add a class for graph components */
+.graph-container {
+  max-width: 100%; /* Ensures the container does not overflow the page width */
+  display: inline-flex; /* Aligns it nicely with other containers, optional based on layout needs */
+  justify-content: center; /* Centers the SVG within the container */
+  align-items: center; /* Middle aligns the SVG within the container */
+  margin: 10px; /* Adds some space around each container */
+  flex: 1 1 auto; /* Allows the container to grow and shrink but respects the content */
+}
+
+
+
+.popups{
+  width: auto;
+  height: auto;
+  max-width: 90vw;
+
+}

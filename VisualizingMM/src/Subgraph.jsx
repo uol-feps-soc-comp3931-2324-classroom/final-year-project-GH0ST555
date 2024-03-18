@@ -71,7 +71,7 @@ const SubgraphComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLink
   }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes
 
   return (
-    <div ref={d3Container} />
+    <div ref={d3Container}/>
   );
 };
 

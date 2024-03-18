@@ -166,6 +166,7 @@ const GridSizeForm = () => {
   
 
   return (
+    <>
     <div>
       <form onSubmit={handleSubmit}>
         <label>
@@ -175,8 +176,7 @@ const GridSizeForm = () => {
         </label>
         <button type="submit">Create Grid</button>
       </form>
-      {gridData && (
-        <>
+      {gridData && (        <div className='popups'>
             <Popup trigger=
                 {<button> Select Subgraph Elements </button>} 
                 modal nested>
@@ -212,27 +212,35 @@ const GridSizeForm = () => {
             <Dropdown options={options} onChange={({ value }) => setSelectedOption(value)} value={defaultOption} placeholder="Select Structuring Element" />
             <Dropdown options={MMoperation} onChange={({ value }) => setSelectedMMop(value)} value={defaultMMOpertaion} placeholder="Select MM Operation" />
             <button onClick= {handleOperationClick}> Perform Operation </button>
-        <p>This Is The Grid</p>
+            </div>)}
+    </div>
+      <div className='Graphs'>
+      {gridData && (
+        <>
+
+        {/* <p>This Is The Grid</p> */}
         <GridComponent rows={gridData.rows} cols ={gridData.cols} nodes={gridData.nodes} links={gridData.links} />
         </>
       )}
       {generateSG && (
         <>
-        <p>This Is The SubGraph</p>
+        {/* <p>This Is The SubGraph</p> */}
         <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />  
         </>
       )}
       {customSE && (
         <>
-        <p>This Is The Selected Strucutring Element</p>
+        {/* <p>This Is The Selected Strucutring Element</p> */}
         <SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} selectedOrigin={selectedOrigin} />  
         </>
       )}
 
       {dilatedData && (
               <>
+              <div>
               <p>This Is The Dilated Data</p>
-              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} />
+              </div>
+              <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} className='graph-component'/>
               </>
             )}
       {erodedData && (
@@ -248,6 +256,7 @@ const GridSizeForm = () => {
               </>
             )}      
     </div>
+    </>
   );
 };
 
