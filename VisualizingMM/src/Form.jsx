@@ -193,22 +193,59 @@ const GridSizeForm = () => {
                     )
                 }
             </Popup>
-            <Popup trigger=
-                {<button> Select Custom SE </button>} 
-                modal nested>
-                {
-                    close => (
-                        <div className='modal'>
-                            <div>
-                                <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
-                                <button onClick= {() => {close(); setcustomSE(true)}}> Submit SE </button>
-                            </div>
-                          <p>Select the edges/nodes you would want part of the Structuring Element. Selected Elements Turn Red</p>
-                          <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
-                        </div>
-                    )
-                }
-            </Popup>
+            {selectedOption == 'Custom SE' && (
+              <>
+              <Popup trigger=
+                  {<button> Select Node Function </button>} 
+                  modal nested>
+                  {
+                      close => (
+                          <div className='modal'>
+                              <div>
+                                  <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
+                                  <button onClick= {() => {close(); setcustomSE(true)}}> Set </button>
+                              </div>
+                            <p>Select Nodes/Edges to be applied when a node is identified</p>
+                            <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
+                          </div>
+                      )
+                  }
+              </Popup>
+              <Popup trigger=
+                  {<button> Select H Edge Function </button>} 
+                  modal nested>
+                  {
+                      close => (
+                          <div className='modal'>
+                              <div>
+                                  <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
+                                  <button onClick= {() => {close(); setcustomSE(true)}}> Set </button>
+                              </div>
+                            <p>Select Nodes/Edges to be applied when a horizontal edge is identified</p>
+                            <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
+                          </div>
+                      )
+                  }
+              </Popup>
+              <Popup trigger=
+                  {<button> Select V Edge Function </button>} 
+                  modal nested>
+                  {
+                      close => (
+                          <div className='modal'>
+                              <div>
+                                  <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
+                                  <button onClick= {() => {close(); setcustomSE(true)}}> Set </button>
+                              </div>
+                            <p>Select Nodes/Edges to be applied when a vertical edge is identified</p>
+                            <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
+                          </div>
+                      )
+                  }
+              </Popup>
+              </>         
+             )}
+
             <Dropdown options={options} onChange={({ value }) => setSelectedOption(value)} value={defaultOption} placeholder="Select Structuring Element" />
             <Dropdown options={MMoperation} onChange={({ value }) => setSelectedMMop(value)} value={defaultMMOpertaion} placeholder="Select MM Operation" />
             <button onClick= {handleOperationClick}> Perform Operation </button>
@@ -237,15 +274,15 @@ const GridSizeForm = () => {
 
       {dilatedData && (
               <>
-              <div>
-              <p>This Is The Dilated Data</p>
-              </div>
+                {/* <div className='text-container'>
+                  <p className='text'>This Is The Dilated Data</p>
+                </div> */}
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} className='graph-component'/>
               </>
             )}
       {erodedData && (
               <>
-              <p>This Is The Eroded Data</p>
+              {/* <p>This Is The Eroded Data</p> */}
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.erodedNodes} selectedLinks={erodedData.erodedLinks} /> 
               </>
             )}

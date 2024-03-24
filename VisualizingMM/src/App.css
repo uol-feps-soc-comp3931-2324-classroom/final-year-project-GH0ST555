@@ -32,6 +32,21 @@
 }
 
 
+/* .text{
+  display: flex !important ;
+  flex-direction: column !important;
+} */
+
+.text {
+  /* Not recommended for removing flex influence, shown for educational purposes */
+  align-self: flex-start; /* Aligns the item to the start of the flex container */
+  flex: 0 0 auto; /* Prevents the item from growing or shrinking */
+}
+
+.text-container {
+  display: block; /* Resets to block layout for this container only */
+}
+
 
 .popups{
   width: auto;
