@@ -20,7 +20,6 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
       const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
       // Increase the distance between nodes dynamically
-      // For example, add an additional distance based on the grid size
       const additionalDistance = 50;
       const gap = cellSize + additionalDistance;
 
@@ -44,7 +43,7 @@ const SubgraphSelector = ({ rows,cols, nodes, links,onNodeSelect, onLinkSelect,s
       });
       
 
-      // Draw the links (lines)
+      // Draw the edges (lines)
       //added a class attribte and event handler for clicking to identify edge was clicked
       svg.selectAll(".edge")
         .data(links, d => d.id)
