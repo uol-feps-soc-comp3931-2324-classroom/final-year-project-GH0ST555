@@ -201,10 +201,11 @@ const GridSizeForm = () => {
   const handleDilation = async (e) => {
     try {
       console.log(selectedHSELinks,selectedHSENodes,selectedVSELinks,selectedVSENodes);
-    const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, 
+      //Convert SE data into a single object to send to the server. Making it easier to read
+      const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
+      const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, 
       selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes,
-       links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, 
-       SENodes: selectedSENodes, SELinks: selectedSELinks});
+      links:gridData.links ,SE: selectedOption, SEData: SEData});
       setDilatedData(response.data);
       console.log(response.data);
     } catch (error) {
@@ -216,8 +217,8 @@ const GridSizeForm = () => {
   const handleErosion = async (e) => {
     try {
       const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, 
-        selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, 
-        SENodes: selectedSENodes, SELinks: selectedSELinks});
+      selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, 
+      SENodes: selectedSENodes, SELinks: selectedSELinks});
       setErodedData(response.data);
       console.log(response.data);
     } catch (error) {

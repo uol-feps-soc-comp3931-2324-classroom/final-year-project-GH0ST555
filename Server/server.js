@@ -23,14 +23,13 @@ app.post('/api/grid', (req, res) => {
 });
 
 app.post('/api/dilateGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,SEData } = req.body;
   
   if (SE != 'Custom SE'){
     res.json(dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    const{id,type,add} = Origin
-    res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
+    res.json(customDilation(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
   }
   
 });
@@ -463,23 +462,24 @@ function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
 
 
 //A custom dilation when the user inputs their own structuring element
-function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks) {
+function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, SEData) {
   // Placeholder for calculatePositions function
   let rpNodes, rpLinks;
+  const{selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks} = SEData;
+  // Prepare data to hold the results of dilation
+  const dilatedNodes = new Set();
+  const dilatedLinks = [];
 
-  if (originType == 'node') {
-    ({ rpNodes, rpLinks } = calculatePositionsNC(originId, SENodes, SELinks, rows, cols));
-      // Prepare new sets to hold the results of dilation
-      const dilatedNodes = new Set();
-      const dilatedLinks = [];
-
+  //if the selected origin exists(node case)
+  if (selectedOrigin) {
+    ({ rpNodes, rpLinks } = calculatePositionsNC(selectedOrigin.id, selectedSENodes, selectedSELinks, rows, cols));
       // Apply the structuring element to each selected node
       selectedNodes.forEach(nodeId => {
         // Apply each relative position of SE nodes to the current node
         rpNodes.forEach(({ relativePosition }) => {
           const newRow = Math.floor(nodeId / cols) + relativePosition.y;
           const newCol = nodeId % cols + relativePosition.x;
-          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes')
+          const addNode = !(relativePosition.y==0 && relativePosition.x==0 && selectedOrigin.add !=='yes')
           if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && addNode) {
             const newNodeId = newRow * cols + newCol;
             dilatedNodes.add(newNodeId);
@@ -511,20 +511,14 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
           }
         });
       });
-      // Convert sets back to arrays for the response
-      const dilatedNodesArray = Array.from(dilatedNodes);
-
-      return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
   }
 
-  else if (originType == 'Horizontal') {
-    const parts = originId.split('-');
+  if (selectedHOrigin) {
+    const parts = selectedHOrigin.id.split('-');
     const eNode = parseInt(parts[2], 10); // This converts string to integer
 
-    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, selectedHSENodes, selectedHSELinks, rows, cols));
     // Prepare new sets to hold the results of dilation
-    const dilatedNodes = new Set();
-    const dilatedLinks = [];
 
     // Apply the structuring element to each selected node
     selectedNodes.forEach(nodeId => {
@@ -535,39 +529,6 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         dilatedNodes.add(nodeId);
         dilatedNodes.add(nodeId+1);
         dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+1}-${nodeId}`));
-
-        // neighbors.forEach(neighbor => {
-        //   if (!dilatedNodes.has(neighbor)) {
-        //     dilatedNodes.add(neighbor);
-        //   }
-        // });
-
-        // neighborsR.forEach(neighbor => {
-        //   if (!dilatedNodes.has(neighbor)) {
-        //     dilatedNodes.add(neighbor);
-        //   }
-        // });
-
-        // //start with left side of this process.
-        // //Add all neigbours of the Node
-        // const connectedLinks = getConnectedLinks(nodeId, links);
-        // connectedLinks.forEach(link => {
-        //   // Check if the link exists in selectedLinks by comparing link ids
-        //   const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-        
-        //   // If the link is not already in selectedLinks, add it
-        //   if (!linkExistsInSelected) {
-        //     dilatedLinks.push(link);
-        //   }
-        // });
-        
-        // const connectedLinksR = getConnectedLinks(nodeId+1, links);
-        // connectedLinksR.forEach(link => {
-        //   const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-        //   if (!linkExistsInSelectedR) {
-        //     dilatedLinks.push(link);
-        //   }
-        // });
 
       // Apply each relative position of SE nodes to the current node
       rpNodes.forEach(({ relativePosition }) => {
@@ -603,23 +564,14 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         }
       });
     }
-
-    });
-    
-    // Convert sets back to arrays for the response
-    const dilatedNodesArray = Array.from(dilatedNodes);
-
-    return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
-  }
-
-  else if (originType =='Vertical'){
-    const parts = originId.split('-');
+  });
+}
+  if (selectedVOrigin){
+    const parts = selectedVOrigin.id.split('-');
     const eNode = parseInt(parts[2], 10); //string to integer conversion 
 
-    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
-    // Prepare new sets to hold the results of dilation
-    const dilatedNodes = new Set();
-    const dilatedLinks = [];
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, selectedVSENodes, selectedVSELinks, rows, cols));
+
 
     selectedNodes.forEach(nodeId => {
       const neighbors = getNeighbors(nodeId,rows,cols);
@@ -629,39 +581,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
         dilatedNodes.add(nodeId);
         dilatedNodes.add(nodeId+cols);
         dilatedLinks.push(selectedLinks.find(link => link.id === `link-${nodeId+cols}-${nodeId}`));
-        
-        // neighbors.forEach(neighbor => {
-        //   if (!dilatedNodes.has(neighbor)) {
-        //     dilatedNodes.add(neighbor);
-        //   }
-        // });
 
-        // neighborsB.forEach(neighbor => {
-        //   if (!dilatedNodes.has(neighbor)) {
-        //     dilatedNodes.add(neighbor);
-        //   }
-        // });
-
-        // //start with left side of this process.
-        // //Add all neigbours of the Node
-        // const connectedLinks = getConnectedLinks(nodeId, links);
-        // connectedLinks.forEach(link => {
-        //   // Check if the link exists in selectedLinks by comparing link ids
-        //   const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-        
-        //   // If the link is not already in selectedLinks, add it
-        //   if (!linkExistsInSelected) {
-        //     dilatedLinks.push(link);
-        //   }
-        // });
-        
-        // const connectedLinksB = getConnectedLinks(nodeId+cols, links);
-        // connectedLinksB.forEach(link => {
-        //   const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
-        //   if (!linkExistsInSelectedR) {
-        //     dilatedLinks.push(link);
-        //   }
-        // });
 
       // Apply each relative position of SE nodes to the current node
       rpNodes.forEach(({ relativePosition }) => {
@@ -698,11 +618,10 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
       });
     }
     });
-
+  }
     // Convert sets back to arrays for the response
     const dilatedNodesArray = Array.from(dilatedNodes);
     return { dilatedNodes: dilatedNodesArray, dilatedLinks: dilatedLinks };
-  }
 }
 
 //a function that handles erosion when the SE is user inputted
