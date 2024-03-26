@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
+
+//Needs Refinement
 //This is the SE Selector Component.
 //Takes in the data from the endpoint and uses d3 to create a visual of the Structuring Element enclosed in an svg
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
