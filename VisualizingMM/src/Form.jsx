@@ -216,9 +216,10 @@ const GridSizeForm = () => {
 
   const handleErosion = async (e) => {
     try {
+      //Convert SE data into a single object to send to the server. Making it easier to read
+      const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, 
-      selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, 
-      SENodes: selectedSENodes, SELinks: selectedSELinks});
+      selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption,  SEData: SEData });
       setErodedData(response.data);
       console.log(response.data);
     } catch (error) {

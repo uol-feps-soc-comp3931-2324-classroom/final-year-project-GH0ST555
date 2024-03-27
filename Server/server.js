@@ -35,13 +35,12 @@ app.post('/api/dilateGrid', (req, res) => {
 });
 
 app.post('/api/erodeGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,SEData } = req.body;
   if(SE != 'Custom SE'){
     res.json(erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    const{id,type,add} = Origin;
-    res.json(customErosion(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
+    res.json(customErosion(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
   }
   
 });
@@ -625,7 +624,7 @@ function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, links, 
 }
 
 //a function that handles erosion when the SE is user inputted
-function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, originId, originType,addOrigin, SENodes, SELinks)
+function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, SEData)
 {
   let rpNodes, rpLinks;
   // if the subgraph is null, the whole grid will now be the result
@@ -637,12 +636,14 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
     return {erodedNodes: nodesArray,erodedLinks: links}
   }
 
-  else if (originType =='node'){
-    ({ rpNodes, rpLinks } = calculatePositionsNC(originId, SENodes, SELinks, rows, cols));
-      // Prepare new sets to hold the results of dilation
-      const erodedNodes = [];
-      const erodedLinks = [];
+  const{selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks} = SEData;
 
+  // Prepare new arrays to hold the results of erosion
+  const erodedNodes = [];
+  const erodedLinks = [];
+
+  if (selectedOrigin){
+    ({ rpNodes, rpLinks } = calculatePositionsNC(selectedOrigin.id, selectedSENodes, selectedSELinks, rows, cols));
       // We see all selected nodes to check if the SE is within the subgraph
       selectedNodes.forEach(nodeId => {
         let add_flag = true;
@@ -686,26 +687,18 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
             }
           }
         });
-        // console.log(add_flag);
         //if all the nodes and edges are within the subgaph we add that node
         if (add_flag == true){
           erodedNodes.push(nodeId);
         }
       });
-
-      return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
-
   }
 
-  else if (originType == 'Horizontal') {
-    const parts = originId.split('-');
+  if (selectedHOrigin) {
+    const parts = selectedHOrigin.id.split('-');
     const eNode = parseInt(parts[2], 10); // This converts string to integer
 
-    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
-    // Prepare new sets to hold the results of dilation
-    const erodedNodes = [];
-    const erodedLinks = [];
-
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, selectedHSENodes, selectedHSELinks, rows, cols));
     // Apply the structuring element to each selected node
     selectedNodes.forEach(nodeId => {
       let add_flag = true;
@@ -760,20 +753,14 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
       }
     }
 
-    });
-    
-    return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
+  });
   }
 
-  else if (originType == 'Vertical') {
-    const parts = originId.split('-');
+  if (selectedVOrigin) {
+    const parts = selectedVOrigin.id.split('-');
     const eNode = parseInt(parts[2], 10); // This converts string to integer
 
-    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, SENodes, SELinks, rows, cols));
-    // Prepare new sets to hold the results of dilation
-    const erodedNodes = [];
-    const erodedLinks = [];
-
+    ({ rpNodes, rpLinks } = calculatePositionsNC(eNode, selectedVSENodes, selectedVSELinks, rows, cols));
     // Apply the structuring element to each selected node
     selectedNodes.forEach(nodeId => {
       let add_flag = true;
@@ -830,8 +817,8 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, o
 
     });
     
-    return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
   }
+  return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
 }
 
 //given a node and the structure of the grid,
