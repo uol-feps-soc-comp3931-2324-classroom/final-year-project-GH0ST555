@@ -46,14 +46,24 @@ app.post('/api/erodeGrid', (req, res) => {
 });
 
 app.post('/api/openGrid', (req, res) => {
-  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,Origin, SENodes, SELinks } = req.body;
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,SEData } = req.body;
   if(SE != 'Custom SE'){
     res.json(opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    const{id,type,add} = Origin;
     //todo
-    // res.json(customOpening(rows,cols,selectedNodes,selectedLinks,nodes,links,id,type,add,SENodes,SELinks));
+    // res.json(customOpening(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
+  }
+});
+
+app.post('/api/closeGrid', (req, res) => {
+  const {rows,cols,selectedNodes,selectedLinks, nodes, links, SE,SEData} = req.body;
+  if(SE != 'Custom SE'){
+    res.json(closing(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
+  }
+  else{
+    //todo
+    // res.json(customClosing(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
   }
 });
 
@@ -450,13 +460,22 @@ else if (SE == 'Vertical Edge') {
 //erosion followed by dilation results in opening
 //This function is for preset cases
 function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
-  if (SE == 'Single Node'){
-    return { resultNodes: selectedNodes, resultdLinks: null }
-  }
-  //Note that we dont need more conditional statements. remove this when the erosion for the hard coded cases are complete
+  
     const{erodedNodes,erodedLinks} = erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE);
     const{dilatedNodes,dilatedLinks} = dilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SE);
     return { resultNodes: dilatedNodes, resultLinks: dilatedLinks };
+}
+
+
+//dilation followed by erosion results in opening
+//This function is for preset cases
+function closing(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
+  //Just call the dilation function first and use the nodes as the selected nodes in erosion
+  const{dilatedNodes,dilatedLinks} = dilation(rows,cols,selectedNodes,selectedLinks,nodes,links,SE);
+    const{erodedNodes,erodedLinks} = erosion(rows,cols,dilatedNodes,dilatedLinks, nodes, links, SE);
+    
+    //the eroded nodes and edges are what we need to return 
+    return { resultNodes: erodedNodes, resultLinks: erodedLinks };
 }
 
 
