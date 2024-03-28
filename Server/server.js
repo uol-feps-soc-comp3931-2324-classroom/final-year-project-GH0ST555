@@ -15,11 +15,7 @@ app.post('/api/grid', (req, res) => {
   const { rows,cols } = req.body;
   const matrix = createAdjacencyMatrix(rows,cols);
   const { nodes, links } = createNodesandEdges(matrix,rows,cols);
-  res.send({rows,cols,matrix,nodes,links});
-  // console.log(matrix);
-  // console.log("Nodes:", nodes);
-  // console.log("Edges:", links);  
-  
+  res.send({rows,cols,matrix,nodes,links});  
 });
 
 app.post('/api/dilateGrid', (req, res) => {
@@ -51,8 +47,7 @@ app.post('/api/openGrid', (req, res) => {
     res.json(opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    //todo
-    // res.json(customOpening(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
+    res.json(customOpening(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
   }
 });
 
@@ -62,8 +57,7 @@ app.post('/api/closeGrid', (req, res) => {
     res.json(closing(rows,cols,selectedNodes,selectedLinks, nodes, links, SE));
   }
   else{
-    //todo
-    // res.json(customClosing(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
+    res.json(customClosing(rows,cols,selectedNodes,selectedLinks,nodes,links,SEData));
   }
 });
 
@@ -839,6 +833,23 @@ function customErosion(rows, cols, selectedNodes, selectedLinks, nodes, links, S
   }
   return { erodedNodes: erodedNodes, erodedLinks: erodedLinks };
 }
+
+//similar to opening but calling the custom versions of erosion followed by dilation
+function customOpening(rows, cols, selectedNodes, selectedLinks, nodes, links, SEData)
+{
+  const{erodedNodes,erodedLinks} = customErosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SEData);
+  const{dilatedNodes,dilatedLinks} = customDilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SEData);
+  return { resultNodes: dilatedNodes, resultLinks: dilatedLinks };
+}
+
+//similar to closing but calling the custom versions of dilation followed by erosion
+function customClosing(rows, cols, selectedNodes, selectedLinks, nodes, links, SEData)
+{
+  const{erodedNodes,erodedLinks} = customErosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SEData);
+  const{dilatedNodes,dilatedLinks} = customDilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SEData);
+  return { resultNodes: dilatedNodes, resultLinks: dilatedLinks };
+}
+
 
 //given a node and the structure of the grid,
 //Retrieves all possible neighbours in the form of an array
