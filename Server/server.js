@@ -3,6 +3,7 @@ import cors from 'cors';
 import jsdom from 'jsdom';
 import { link } from 'd3';
 const { JSDOM } = jsdom;
+import { createAdjacencyMatrix, createNodesandEdges } from './CreateDS.js';
 
 const app = express();
 const port = 3001;
@@ -62,62 +63,7 @@ app.post('/api/closeGrid', (req, res) => {
 });
 
 
-function createAdjacencyMatrix(rows, cols) {
-  const size = rows * cols;
-  const matrix = [];
 
-  for (let i = 0; i < size; i++) {
-    matrix[i] = new Array(size).fill(0);
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-
-    // Right neighbor
-    if (col < cols - 1) matrix[i][i + 1] = 1;
-    // Left neighbor
-    if (col > 0) matrix[i][i - 1] = 1;
-    // Bottom neighbor
-    if (row < rows - 1) matrix[i][i + cols] = 1;
-    // Top neighbor
-    if (row > 0) matrix[i][i - cols] = 1;
-  }
-
-  return matrix;
-}
-
-function createNodesandEdges(matrix, rows, cols) {
-  const size = rows * cols;
-  const nodes = matrix.map((_, i) => ({ id: i }));
-  const links = [];
-
-  matrix.forEach((row, i) => {
-    row.forEach((cell, j) => {
-      if (cell === 1) {
-        const sourceRow = Math.floor(i / cols);
-        const sourceCol = i % cols;
-        const targetRow = Math.floor(j / cols);
-        const targetCol = j % cols;
-
-        if (sourceRow === targetRow) {
-          links.push({
-            id: `link-${i}-${j}`,
-            source: i,
-            target: j,
-            edgetype: 'Horizontal'
-          });
-        } else if (sourceCol === targetCol) {
-          links.push({
-            id: `link-${i}-${j}`,
-            source: i,
-            target: j,
-            edgetype: 'Vertical'
-          });
-        }
-      }
-    });
-  });
-
-  return { nodes, links };
-}
 
 //perform dilation on predefined cases
 //The idea is to match the orign SE to elemtents of the subgraph
