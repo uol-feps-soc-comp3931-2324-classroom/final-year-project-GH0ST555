@@ -1,9 +1,18 @@
 // This code is responsible for creating the data structure required for this program
 
+//function that creates an adjacency matrix for any dimensional grid.
+//this matrix is the underlying data type for this program
 export function createAdjacencyMatrix(rows, cols) {
-    const size = rows * cols;
+
     const matrix = [];
-  
+
+    //improper values check
+    if (rows < 0 || cols < 0){
+      return matrix;
+    }
+
+    const size = rows * cols;
+    
     for (let i = 0; i < size; i++) {
       matrix[i] = new Array(size).fill(0);
       const row = Math.floor(i / cols);
