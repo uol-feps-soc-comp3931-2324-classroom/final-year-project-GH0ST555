@@ -25,6 +25,6 @@
     }
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --verbose"
   }
 }
