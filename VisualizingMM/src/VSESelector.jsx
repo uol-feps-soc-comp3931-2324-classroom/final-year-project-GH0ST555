@@ -68,7 +68,16 @@ const VSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
           const currentColor = d3.select(this).attr("stroke");
           const newColor = currentColor === "black" ? "red" : "black";
           d3.select(this).attr("stroke", newColor);
-          onLinkSelect(d,scenario);
+
+          // Change node colors linked to the edge if they are un-selected only
+          [d.source, d.target].forEach(nodeId => {
+            const node = svg.selectAll(".node").filter(n => n.id === nodeId);
+            const currentNodeColor = node.attr("fill");
+            if (currentNodeColor === "black") {
+              node.attr("fill", "red");
+            }
+          });
+          onLinkSelect(d,scenario,d.source,d.target);
         });
 
       // Nodes rendering remmains the same as Subgraph selector

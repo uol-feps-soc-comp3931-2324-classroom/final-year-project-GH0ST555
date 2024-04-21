@@ -194,6 +194,21 @@ const GridSizeForm = () => {
           return [...prevSelectedLinks, link];
         }
       });
+
+      //When an edge is selected, both nodes that are linked by the edge must be added if not previously added
+      setSelectedHSENodes(prevSelectedNodes => {
+        let updatedNodes = [...prevSelectedNodes];
+        const isSelected = prevSelectedNodes.includes(node);
+        const isSelected2 = prevSelectedNodes.includes(node2);
+        if (!isSelected) {
+          updatedNodes.push(node);
+        }
+        if (!isSelected2) {
+          updatedNodes.push(node2);
+        }
+
+        return updatedNodes;
+      });
     }
 
     else if (scenario =='VSE'){
@@ -206,6 +221,21 @@ const GridSizeForm = () => {
           // If not selected, add it to the selection
           return [...prevSelectedLinks, link];
         }
+      });
+
+      //When an edge is selected, both nodes that are linked by the edge must be added if not previously added
+      setSelectedVSENodes(prevSelectedNodes => {
+        let updatedNodes = [...prevSelectedNodes];
+        const isSelected = prevSelectedNodes.includes(node);
+        const isSelected2 = prevSelectedNodes.includes(node2);
+        if (!isSelected) {
+          updatedNodes.push(node);
+        }
+        if (!isSelected2) {
+          updatedNodes.push(node2);
+        }
+
+        return updatedNodes;
       });
     }
 
