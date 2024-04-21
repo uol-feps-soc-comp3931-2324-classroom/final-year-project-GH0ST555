@@ -235,7 +235,7 @@ export function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE
           let countr = 0;
           const neighbors = getNeighbors(nodeId, rows, cols);
           const neighborsR = getNeighbors(nodeId + 1, rows, cols);
-          //A node, its neighbour and its edge needs to be present to perform dilation in this case
+          //The required pattern must be present to perform erosion in this case
           if (neighbors.includes(nodeId + 1) && selectedNodes.includes(nodeId + 1) && selectedLinks.some(link => link.id === `link-${nodeId+1}-${nodeId}`)) {
             neighbors.forEach(neighbor => {
                 if (!selectedNodes.includes(neighbor)) {
@@ -307,7 +307,7 @@ export function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE
         const connectedLinks = getConnectedLinks(nodeId, links);
         connectedLinks.forEach(link => {
           // Check if the link exists in selectedLinks by comparing link ids
-          console.log(selectedLinks.find(selectedLink => selectedLink.id === link.id));
+          // console.log(selectedLinks.find(selectedLink => selectedLink.id === link.id));
           const linkExistsInSelected = selectedLinks.some(selectedLink => selectedLink.id === link.id);
         
           // If the link is not already in selectedLinks, add it

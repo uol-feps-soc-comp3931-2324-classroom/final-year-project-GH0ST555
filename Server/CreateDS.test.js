@@ -122,6 +122,7 @@ describe('createNodesandEdges', () => {
 
   });
 
+  //Fix? -> Warning Message instead of Empty values
   test('correctly handles nodes and edges for an a grid with improper dimensions', () => {
 
     //expected behaviour is that no nodes or edges are created (arrays are empty)

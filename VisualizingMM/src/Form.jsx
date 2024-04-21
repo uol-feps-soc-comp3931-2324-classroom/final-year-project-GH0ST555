@@ -127,8 +127,8 @@ const GridSizeForm = () => {
 
   };
   
-  const onLinkSelect = (link, scenario) => {
-    if (scenario == 'Subgraph'){
+  const onLinkSelect = (link, scenario,node,node2) => {
+    if (scenario == 'Subgraph'){ 
       setSelectedLinks(prevSelectedLinks => {
         const isSelected = prevSelectedLinks.some(selectedLink => selectedLink.id === link.id);
         if (isSelected) {
@@ -139,6 +139,21 @@ const GridSizeForm = () => {
           return [...prevSelectedLinks, link];
         }
       });
+      //When an edge is selected, both nodes that are linked by the edge must be added if not previously added
+      setSelectedNodes(prevSelectedNodes => {
+        let updatedNodes = [...prevSelectedNodes];
+        const isSelected = prevSelectedNodes.includes(node);
+        const isSelected2 = prevSelectedNodes.includes(node2);
+        if (!isSelected) {
+          updatedNodes.push(node);
+        }
+        if (!isSelected2) {
+          updatedNodes.push(node2);
+        }
+
+        return updatedNodes;
+      });
+      
     }
     else if (scenario =='SE'){
       setSelectedSELinks(prevSelectedLinks => {
@@ -150,6 +165,21 @@ const GridSizeForm = () => {
           // If not selected, add it to the selection
           return [...prevSelectedLinks, link];
         }
+      });
+
+      //When an edge is selected, both nodes that are linked by the edge must be added if not previously added
+      setSelectedSENodes(prevSelectedNodes => {
+        let updatedNodes = [...prevSelectedNodes];
+        const isSelected = prevSelectedNodes.includes(node);
+        const isSelected2 = prevSelectedNodes.includes(node2);
+        if (!isSelected) {
+          updatedNodes.push(node);
+        }
+        if (!isSelected2) {
+          updatedNodes.push(node2);
+        }
+
+        return updatedNodes;
       });
     }
 
@@ -200,6 +230,9 @@ const GridSizeForm = () => {
   //need to add the new data here
   const handleDilation = async (e) => {
     try {
+      console.log(selectedSENodes);
+      console.log(selectedSELinks);
+      console.log(selectedOrigin);
       console.log(selectedHSELinks,selectedHSENodes,selectedVSELinks,selectedVSENodes);
       //Convert SE data into a single object to send to the server. Making it easier to read
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
@@ -217,6 +250,9 @@ const GridSizeForm = () => {
   const handleErosion = async (e) => {
     try {
       //Convert SE data into a single object to send to the server. Making it easier to read
+      console.log(selectedNodes);
+      console.log(selectedLinks);
+      console.log(selectedOrigin);
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, 
       selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption,  SEData: SEData });

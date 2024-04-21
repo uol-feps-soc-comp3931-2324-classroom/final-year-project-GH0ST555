@@ -68,7 +68,16 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
           const currentColor = d3.select(this).attr("stroke");
           const newColor = currentColor === "black" ? "red" : "black";
           d3.select(this).attr("stroke", newColor);
-          onLinkSelect(d,scenario);
+
+        // Change node colors if they are black
+        [d.source, d.target].forEach(nodeId => {
+          const node = svg.selectAll(".node").filter(n => n.id === nodeId);
+          const currentNodeColor = node.attr("fill");
+          if (currentNodeColor === "black") {
+            node.attr("fill", "red");
+          }
+        });
+          onLinkSelect(d,scenario,d.source,d.target);
         });
 
       // Nodes rendering
