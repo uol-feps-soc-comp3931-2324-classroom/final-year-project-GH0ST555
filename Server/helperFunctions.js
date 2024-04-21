@@ -36,12 +36,6 @@ export function getNeighbors(nodeId, rows, cols) {
    }
    
    
-    // Function to get row and col for a node ID
-    export const getRowCol = (nodeId, cols) => {
-      const row = Math.floor(nodeId / cols);
-      const col = nodeId % cols;
-      return { row, col };
-    };
 
    // Calculate relative positions (When the origin is a node)
    export const calculatePositionsNC = (originNode, nodes, links, rows, cols) => {
@@ -54,7 +48,7 @@ export function getNeighbors(nodeId, rows, cols) {
 
     // Calculate relative positions for nodes
     const rpNodes = nodes.map(node => {
-      const { row, col } = getRowCol(node.id, cols);
+      const { row, col } = getRowCol(node, cols);
 
       return {
         nodeId: node,
@@ -72,10 +66,17 @@ export function getNeighbors(nodeId, rows, cols) {
         targetRelativePosition: { x: targetCol - originCol, y: targetRow - originRow },
         edgetype: link.edgetype
       };
-    });
-   
+    });   
      return { rpNodes, rpLinks };
    };
+
+  // Function to get row and col for a node ID
+  export const getRowCol = (nodeId, cols) => {
+  const row = Math.floor(nodeId / cols);
+  const col = nodeId % cols;
+  return { row, col };
+  };
+  
    
 
    

@@ -148,15 +148,16 @@ describe('calculatePositionsNC', () => {
 
     const matrix = createAdjacencyMatrix(rows, cols);
     const { nodes, links } = createNodesandEdges(matrix, rows, cols);
+    const arrnodes = [0,1,2,3]
 
-    const {rpNodes,rpLinks} = calculatePositionsNC(0, nodes, links, rows, cols);
+    const {rpNodes,rpLinks} = calculatePositionsNC(0, arrnodes, links, rows, cols);
 
 
     expect(rpNodes).toEqual([
-      { nodeId: { id: 0 }, relativePosition: { x: 0, y: 0 } },
-      { nodeId: { id: 1 }, relativePosition: { x: 1, y: 0 } },
-      { nodeId: { id: 2 }, relativePosition: { x: 0, y: 1 } },
-      { nodeId: { id: 3 }, relativePosition: { x: 1, y: 1 } }
+      { nodeId: 0, relativePosition: { x: 0, y: 0 } },
+      { nodeId: 1, relativePosition: { x: 1, y: 0 } },
+      { nodeId: 2, relativePosition: { x: 0, y: 1 } },
+      { nodeId: 3, relativePosition: { x: 1, y: 1 } }
     ]);
 
     expect(rpLinks).toEqual([
