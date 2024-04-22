@@ -6,7 +6,7 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box; /* Ensures padding doesn't add to the width */
+  box-sizing: border-box; 
   overflow: scroll !important;
 }
 
@@ -15,36 +15,42 @@
   height: auto;
   max-width: 90vw !important;
   display: flex;
-  flex-direction: row; /* Change to row to align children horizontally */
-  box-sizing: border-box; /* Ensures padding doesn't add to the width */
-  align-items: start; /* Align items to the start of the flex container */
-  gap: 20px; /* Adds some space between each child component */
+  flex-direction: row; 
+  box-sizing: border-box; 
+  align-items: start; 
+  gap: 20px; 
 }
 
-/* Add a class for graph components */
+.SE {
+  width: auto;
+  height: auto;
+  max-width: 90vw !important;
+  display: flex;
+  flex-direction: row; 
+  box-sizing: border-box; 
+  align-items: start; 
+}
+
+
+
 .graph-container {
-  max-width: 100%; /* Ensures the container does not overflow the page width */
-  display: inline-flex; /* Aligns it nicely with other containers, optional based on layout needs */
-  justify-content: center; /* Centers the SVG within the container */
-  align-items: center; /* Middle aligns the SVG within the container */
-  margin: 10px; /* Adds some space around each container */
-  flex: 1 1 auto; /* Allows the container to grow and shrink but respects the content */
+  max-width: 100%; 
+  display: inline-flex; 
+  justify-content: center;
+  align-items: center;
+  margin: 10px; 
+  flex: 1 1 auto; 
 }
 
-
-/* .text{
-  display: flex !important ;
-  flex-direction: column !important;
-} */
 
 .text {
-  /* Not recommended for removing flex influence, shown for educational purposes */
-  align-self: flex-start; /* Aligns the item to the start of the flex container */
-  flex: 0 0 auto; /* Prevents the item from growing or shrinking */
+
+  align-self: flex-start;
+  flex: 0 0 auto;
 }
 
 .text-container {
-  display: block; /* Resets to block layout for this container only */
+  display: block; 
 }
 
 

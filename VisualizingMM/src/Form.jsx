@@ -418,13 +418,17 @@ const GridSizeForm = () => {
         <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />  
         </>
       )}
-      {/* eror zone */}
+      </div>
+      <div className='SE'>
       {customSE && (
         <>
-        {/* <p>This Is The Selected Strucutring Element</p> */}
-        {/* <SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} selectedOrigin={selectedOrigin} />   */}
+        <p>This Is The Selected Strucutring Element</p>
+        {selectedOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} selectedOrigin={selectedOrigin} />)}
+        {selectedHOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedHSENodes} selectedLinks={selectedHSELinks} selectedOrigin={selectedHOrigin} />)}
+        {selectedVOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedVSENodes} selectedLinks={selectedVSELinks} selectedOrigin={selectedVOrigin} />)}
         </>
       )}
+      </div>
 
       {dilatedData && (
               <>
@@ -446,7 +450,7 @@ const GridSizeForm = () => {
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={openData.resultNodes} selectedLinks={openData.resultLinks} /> 
               </>
             )}      
-    </div>
+    
     </>
   );
 };

@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
 
-//Needs Refinement
 //This is the SE Selector Component.
 //Takes in the data from the endpoint and uses d3 to create a visual of the Structuring Element enclosed in an svg
 //Makes it easier to display the subgraph as i can then conditionally display the nodes and edges with that particular color
@@ -91,7 +90,7 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
         .attr("opacity", d => selectedNodes.includes(d.id) || selectedOrigin.id === d.id ? 1 : 0);
 
     }
-  }, [nodes, links, rows,cols]); // Dependency array to re-run the effect when the data changes
+  }, [nodes, links, rows,cols,selectedNodes, selectedLinks , selectedOrigin]); // Dependency array to re-run the effect when the data changes
 
   return (
     <div ref={d3Container} />
