@@ -15,8 +15,8 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
       d3.select(d3Container.current).selectAll("*").remove();
 
       // Base cell size
-      const cellSize = 50; // This remains constant for node visualization
-      const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+      const cellSize = 40; // This remains constant for node visualization
+      const margin = { top: 0, right: 30, bottom: 0, left: 0 };
 
       // Increase the distance between nodes dynamically
       // For example, add an additional distance based on the grid size
@@ -93,7 +93,9 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
   }, [nodes, links, rows,cols,selectedNodes, selectedLinks , selectedOrigin]); // Dependency array to re-run the effect when the data changes
 
   return (
+
     <div ref={d3Container} />
+
   );
 };
 

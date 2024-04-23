@@ -12,6 +12,7 @@ import SEComponent from './SEComponent';
 import HSESelector from './HSESelector';
 import VSESelector from './VSESelector';
 import 'react-dropdown/style.css'
+import SE_Dropdown from './SE_Dropdown';
 
 const serverUrl = import.meta.env.VITE_REACT_APP_SERVER_URL;
 
@@ -56,14 +57,8 @@ const GridSizeForm = () => {
   const  [generateSG, setGenerateSG] = useState(false);
 
   //default operations for the dropdowns
-  const [selectedOption, setSelectedOption] = useState("Single Node");
+  const [selectedOption, setSelectedOption] = useState(null);
   const  [selectedMMop, setSelectedMMop] = useState("Dilation");
-
-
-    const options = [
-      'Single Node','cross shaped(No Edges)', 'Node + Edge + RNode','Horizontal Edge', 'Vertical Edge', 'Custom SE'
-    ];
-    const defaultOption = options[0];
 
     const MMoperation = [
       'Dilation', 'Erosion','Opening','Closing'
@@ -260,15 +255,12 @@ const GridSizeForm = () => {
   //need to add the new data here
   const handleDilation = async (e) => {
     try {
-      console.log(selectedSENodes);
-      console.log(selectedSELinks);
-      console.log(selectedOrigin);
-      console.log(selectedHSELinks,selectedHSENodes,selectedVSELinks,selectedVSENodes);
+      console.log(selectedOption);
       //Convert SE data into a single object to send to the server. Making it easier to read
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, 
       selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes,
-      links:gridData.links ,SE: selectedOption, SEData: SEData});
+      links:gridData.links ,SE: selectedOption.value, SEData: SEData});
       setDilatedData(response.data);
       console.log(response.data);
     } catch (error) {
@@ -285,7 +277,7 @@ const GridSizeForm = () => {
       console.log(selectedOrigin);
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, 
-      selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption,  SEData: SEData });
+      selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value,  SEData: SEData });
       setErodedData(response.data);
       console.log(response.data);
     } catch (error) {
@@ -295,11 +287,21 @@ const GridSizeForm = () => {
 
   const handleOpening = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
+      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
       setOpenData(response.data);
       console.log(response.data);
     } catch (error) {
       console.error('Error Opening Grid:', error);
+    }
+  };
+
+  const handleClosing = async (e) => {
+    try {
+      const response = await axios.post(`${serverUrl}/api/closeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
+      setOpenData(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error Closing Grid:', error);
     }
   };
 
@@ -329,6 +331,7 @@ const GridSizeForm = () => {
         </label>
         <button type="submit">Create Grid</button>
       </form>
+      
       {gridData && (        <div className='popups'>
             <Popup trigger=
                 {<button> Select Subgraph Elements </button>} 
@@ -399,36 +402,38 @@ const GridSizeForm = () => {
               </>         
              )}
 
-            <Dropdown options={options} onChange={({ value }) => setSelectedOption(value)} value={defaultOption} placeholder="Select Structuring Element" />
+            <SE_Dropdown selectedOption={selectedOption} setSelectedOption={setSelectedOption}></SE_Dropdown>
             <Dropdown options={MMoperation} onChange={({ value }) => setSelectedMMop(value)} value={defaultMMOpertaion} placeholder="Select MM Operation" />
             <button onClick= {handleOperationClick}> Perform Operation </button>
             </div>)}
     </div>
-      <div className='Graphs'>
+    <div className='Graphs'>
       {gridData && (
-        <>
-
-        {/* <p>This Is The Grid</p> */}
-        <GridComponent rows={gridData.rows} cols ={gridData.cols} nodes={gridData.nodes} links={gridData.links} />
-        </>
+        <div className='GraphContainer'>
+          <p>This Is The Grid</p>
+          <GridComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} />
+        </div>
       )}
       {generateSG && (
-        <>
-        {/* <p>This Is The SubGraph</p> */}
-        <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />  
-        </>
+        <div className='GraphContainer'>
+          <p>This Is The SubGraph</p>
+          <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedNodes} selectedLinks={selectedLinks} />
+        </div>
       )}
-      </div>
-      <div className='SE'>
+    </div>
+
+      
       {customSE && (
         <>
         <p>This Is The Selected Strucutring Element</p>
+        <div className='SE'>
         {selectedOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks} selectedOrigin={selectedOrigin} />)}
         {selectedHOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedHSENodes} selectedLinks={selectedHSELinks} selectedOrigin={selectedHOrigin} />)}
         {selectedVOrigin && (<SEComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={selectedVSENodes} selectedLinks={selectedVSELinks} selectedOrigin={selectedVOrigin} />)}
+        </div>
         </>
+
       )}
-      </div>
 
       {dilatedData && (
               <>
