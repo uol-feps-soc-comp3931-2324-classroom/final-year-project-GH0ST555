@@ -54,6 +54,7 @@ const GridSizeForm = () => {
   const [dilatedData,setDilatedData] = useState(null);
   const [erodedData,setErodedData] = useState(null);
   const [openData,setOpenData] = useState(null);
+  const [closeData,setcloseData] = useState(null);
   const  [generateSG, setGenerateSG] = useState(false);
 
   //default operations for the dropdowns
@@ -252,10 +253,9 @@ const GridSizeForm = () => {
     }
   };
 
-  //need to add the new data here
+
   const handleDilation = async (e) => {
     try {
-      console.log(selectedOption);
       //Convert SE data into a single object to send to the server. Making it easier to read
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/dilateGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, 
@@ -272,9 +272,6 @@ const GridSizeForm = () => {
   const handleErosion = async (e) => {
     try {
       //Convert SE data into a single object to send to the server. Making it easier to read
-      console.log(selectedNodes);
-      console.log(selectedLinks);
-      console.log(selectedOrigin);
       const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
       const response = await axios.post(`${serverUrl}/api/erodeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, 
       selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value,  SEData: SEData });
@@ -298,7 +295,7 @@ const GridSizeForm = () => {
   const handleClosing = async (e) => {
     try {
       const response = await axios.post(`${serverUrl}/api/closeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
-      setOpenData(response.data);
+      setcloseData(response.data);
       console.log(response.data);
     } catch (error) {
       console.error('Error Closing Grid:', error);
@@ -314,8 +311,8 @@ const GridSizeForm = () => {
     else if(selectedMMop == "Opening"){
       console.log('BB');
       await handleOpening();
-    } else {
-      console.log("No operation or unrecognized operation selected");
+    } else if(selectedMMop == "Closing"){
+      await handleClosing();
     }
   };
   
@@ -349,7 +346,7 @@ const GridSizeForm = () => {
                     )
                 }
             </Popup>
-            {selectedOption == 'Custom SE' && (
+            {selectedOption.value == 'Custom SE' && (
               <>
               <Popup trigger=
                   {<button> Select Node Function </button>} 
@@ -361,7 +358,8 @@ const GridSizeForm = () => {
                                   <button onClick= { ()=>{close(); setSelectedSENodes([]); setSelectedSELinks([]); setSelectedOrigin(null); setcustomSE(false);}   }> Close </button>
                                   <button onClick= {() => {close(); setcustomSE(true)}}> Set </button>
                               </div>
-                            <p>Select Nodes/Edges to be applied when a node is identified</p>
+                            <p>Select Nodes/Edges to be applied when a node is identified. Right click on a node to select it as the origin. If the node is red before you right click,
+                            it will turn green, indicating you want it to be in the result, if the node is black before you right click, it will turn yellow meaning the origin is not part of the final solution. </p>
                             <SESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "SE" selectedOrigin={selectedOrigin} setSelectedOrigin={setSelectedOrigin} selectedNodes={selectedSENodes} selectedLinks={selectedSELinks}/>
                           </div>
                       )
@@ -377,7 +375,7 @@ const GridSizeForm = () => {
                                   <button onClick= { ()=>{close(); setSelectedHSENodes([]); setSelectedHSELinks([]); setSelectedHOrigin(null); setcustomHSE(false);}   }> Close </button>
                                   <button onClick= {() => {close(); setcustomHSE(true)}}> Set </button>
                               </div>
-                            <p>Select Nodes/Edges to be applied when a horizontal edge is identified</p>
+                            <p>Select Nodes/Edges to be applied when a horizontal edge is identified. Right click on the selected horizontal edge to mark it as its origin. The color changes to green (required)</p>
                             <HSESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "HSE" selectedOrigin={selectedHOrigin} setSelectedOrigin={setSelectedHOrigin} selectedNodes={selectedHSENodes} selectedLinks={selectedHSELinks}/>
                           </div>
                       )
@@ -393,7 +391,7 @@ const GridSizeForm = () => {
                                   <button onClick= { ()=>{close(); setSelectedVSENodes([]); setSelectedVSELinks([]); setSelectedVOrigin(null); setcustomVSE(false);}   }> Close </button>
                                   <button onClick= {() => {close(); setcustomSE(true)}}> Set </button>
                               </div>
-                            <p>Select Nodes/Edges to be applied when a vertical edge is identified</p>
+                            <p>Select Nodes/Edges to be applied when a vertical edge is identified. Right click on the selected vertical edge to mark it as its origin. The color changes to green (required)</p>
                             <VSESelector rows={gridData.rows}  cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} onNodeSelect={onNodeSelect} onLinkSelect={onLinkSelect} scenario = "VSE" selectedOrigin={selectedVOrigin} setSelectedOrigin={setSelectedVOrigin} selectedNodes={selectedVSENodes} selectedLinks={selectedVSELinks}/>
                           </div>
                       )
@@ -437,24 +435,36 @@ const GridSizeForm = () => {
 
       {dilatedData && (
               <>
-                {/* <div className='text-container'>
-                  <p className='text'>This Is The Dilated Data</p>
-                </div> */}
+                <div className='GraphContainer'>
+                <p>This Is The Dilated Data</p>
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={dilatedData.dilatedNodes} selectedLinks={dilatedData.dilatedLinks} className='graph-component'/>
+              </div>
               </>
             )}
       {erodedData && (
               <>
-              {/* <p>This Is The Eroded Data</p> */}
+                <div className='GraphContainer'>
+                <p>This Is The Eroded Data</p>              
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={erodedData.erodedNodes} selectedLinks={erodedData.erodedLinks} /> 
+              </div>
               </>
             )}
       {openData && (
               <>
+              <div className='GraphContainer'>
               <p>This Is The Data after opening</p>
               <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={openData.resultNodes} selectedLinks={openData.resultLinks} /> 
+              </div>
               </>
-            )}      
+            )} 
+      {closeData && (
+        <>
+        <div className='GraphContainer'>
+        <p>This Is The Data after closing</p>
+        <SubgraphComponent rows={gridData.rows} cols={gridData.cols} nodes={gridData.nodes} links={gridData.links} selectedNodes={closeData.resultNodes} selectedLinks={closeData.resultLinks} /> 
+        </div>
+        </>
+      )}       
     
     </>
   );
