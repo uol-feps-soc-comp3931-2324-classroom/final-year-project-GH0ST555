@@ -328,6 +328,7 @@ const GridSizeForm = () => {
         </label>
         <button type="submit">Create Grid</button>
       </form>
+      <a href="http://localhost:5173/User_Manual.pdf" download="User_Manual.pdf">Download User Manual</a>
       
       {gridData && (        <div className='popups'>
             <Popup trigger=
