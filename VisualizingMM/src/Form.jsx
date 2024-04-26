@@ -346,7 +346,7 @@ const GridSizeForm = () => {
                     )
                 }
             </Popup>
-            {selectedOption.value == 'Custom SE' && (
+            {selectedOption !== null && selectedOption.value === 'Custom SE' && (
               <>
               <Popup trigger=
                   {<button> Select Node Function </button>} 
