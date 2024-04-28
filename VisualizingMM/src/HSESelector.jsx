@@ -11,7 +11,7 @@ const HSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
       d3.select(d3Container.current).selectAll("*").remove();
 
       // Base cell size
-      const cellSize = 50; // This remains constant for node visualization
+      const cellSize = 50; // This remains constant for node visualization, can be altered to reduce the size of the node
       const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
       // Increase the distance between nodes dynamically
@@ -29,12 +29,12 @@ const HSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      // Adjust node positions based on the increased gap
+      // Calcualte position of each node in the SVG image
       nodes.forEach(node => {
         const nodeRow = Math.floor(node.id / cols);
         const nodeCol = node.id % cols;
-        node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
-        node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
+        node.x = nodeCol * gap + gap / 2; // Calculate X position
+        node.y = nodeRow * gap + gap / 2; // Calculate Y position
       });
       
       //to prevent null errors
@@ -57,7 +57,7 @@ const HSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
         })        
          .attr("stroke-width", 3)
          .attr("class", "edge")
-         .on("contextmenu", (event, d) => {
+         .on("contextmenu", (event, d) => { //Event handler for SE selections
             event.preventDefault();
             if (safeSelectedLinks.some(link => link.source === d.source && link.target === d.target && link.edgetype== 'Horizontal')){
               const origin = { id: d.id, type: d.edgetype, add:'yes'}; //Edges as an origin always have to be added
@@ -65,7 +65,7 @@ const HSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
             }
          })
          .on("click", function(event, d) {
-          // Handle click event on edges
+          // Handle click event on edges (edge selection)
           const currentColor = d3.select(this).attr("stroke");
           const newColor = currentColor === "black" ? "red" : "black";
           d3.select(this).attr("stroke", newColor);

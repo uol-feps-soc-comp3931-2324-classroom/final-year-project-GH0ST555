@@ -116,7 +116,7 @@ export function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, 
       selectedNodes.forEach(nodeId => {
         const neighbors = getNeighbors(nodeId,rows,cols);
         const neighborsB = getNeighbors(nodeId+cols,rows,cols);
-        //A node, its neighbour and its edge needs to be present to perfrom dilation in this case
+        //A node, its neighbour and its edge needs to be present to perfrom dilation in this case (Edtge has to be vertical)
         if(neighbors.includes(nodeId+1) && selectedNodes.includes(nodeId+cols) && selectedLinks.some(link => link.id === `link-${nodeId+cols}-${nodeId}`)){
           dilatedNodes.add(nodeId);
           dilatedNodes.add(nodeId+cols);
@@ -192,7 +192,7 @@ export function customDilation(rows, cols, selectedNodes, selectedLinks, nodes, 
           rpNodes.forEach(({ relativePosition }) => {
             const newRow = Math.floor(nodeId / cols) + relativePosition.y;
             const newCol = nodeId % cols + relativePosition.x;
-            const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes') // clarify with DR Stell 
+            const addNode = !(relativePosition.y==0 && relativePosition.x==0 && addOrigin !=='yes')
             if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && addNode) { //to check if within bounds
               const newNodeId = newRow * cols + newCol;
               if (!selectedNodes.includes(newNodeId)){ // check if the relative node is within the subgraph

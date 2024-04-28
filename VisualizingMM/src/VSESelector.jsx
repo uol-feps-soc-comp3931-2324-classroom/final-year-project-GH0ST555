@@ -28,12 +28,12 @@ const VSESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSe
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      // Adjust node positions based on the increased gap
+      // Caclaulate position of each node in the SVG image
       nodes.forEach(node => {
         const nodeRow = Math.floor(node.id / cols);
         const nodeCol = node.id % cols;
-        node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
-        node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
+        node.x = nodeCol * gap + gap / 2; // Calculate X position
+        node.y = nodeRow * gap + gap / 2; // Calculate Y position
       });
       
       //to prevent null errors

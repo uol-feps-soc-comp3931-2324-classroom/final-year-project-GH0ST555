@@ -37,7 +37,7 @@ const SESelector = ({ rows, cols, nodes, links ,onLinkSelect,onNodeSelect,setSel
         node.y = nodeRow * gap + gap / 2; 
       });
 
-      //To prevent null errors
+      //To prevent null errors by providing an empty array as a fallback
       const safeSelectedLinks = selectedLinks || [];
       const safeSelectedNodes = selectedNodes || [];
 

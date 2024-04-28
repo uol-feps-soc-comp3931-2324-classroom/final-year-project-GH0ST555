@@ -17,6 +17,7 @@ import SE_Dropdown from './SE_Dropdown';
 const serverUrl = import.meta.env.VITE_REACT_APP_SERVER_URL;
 
 const GridSizeForm = () => {
+  //data to hold data related to the grid
   const [rows, setRows] = useState('');
   const [cols, setCols] = useState('');
   const [gridData, setGridData] = useState(null); 
@@ -66,6 +67,8 @@ const GridSizeForm = () => {
     ];
     const defaultMMOpertaion = MMoperation[0];
 
+  //function that handles user interaction of nodes in popups.
+  //There are 2 scenarios where this occours: In Subgraph Selection and SE selection
   const onNodeSelect = (node, scenario) => {
     if (scenario == 'Subgraph'){
       setSelectedNodes(prevSelectedNodes => {
@@ -123,6 +126,8 @@ const GridSizeForm = () => {
 
   };
   
+  //function that handles user interaction of edges in popups.
+  //There are 2 scenarios where this occours: In Subgraph Selection and SE selection
   const onLinkSelect = (link, scenario,node,node2) => {
     if (scenario == 'Subgraph'){ 
       setSelectedLinks(prevSelectedLinks => {
@@ -238,6 +243,7 @@ const GridSizeForm = () => {
 
   };
   
+  //Handles creation of the initial grid
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -284,7 +290,8 @@ const GridSizeForm = () => {
 
   const handleOpening = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
+      const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
+      const response = await axios.post(`${serverUrl}/api/openGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, SEData:SEData});
       setOpenData(response.data);
       console.log(response.data);
     } catch (error) {
@@ -294,7 +301,8 @@ const GridSizeForm = () => {
 
   const handleClosing = async (e) => {
     try {
-      const response = await axios.post(`${serverUrl}/api/closeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, Origin: selectedOrigin, SENodes: selectedSENodes, SELinks: selectedSELinks});
+      const SEData ={selectedOrigin,selectedSENodes,selectedSELinks,selectedHOrigin,selectedHSENodes,selectedHSELinks,selectedVOrigin,selectedVSENodes,selectedVSELinks};
+      const response = await axios.post(`${serverUrl}/api/closeGrid`, {rows:gridData.rows , cols:gridData.cols,size: gridData.size, selectedNodes: selectedNodes, selectedLinks:selectedLinks, nodes:gridData.nodes, links:gridData.links ,SE: selectedOption.value, SEData:SEData});
       setcloseData(response.data);
       console.log(response.data);
     } catch (error) {

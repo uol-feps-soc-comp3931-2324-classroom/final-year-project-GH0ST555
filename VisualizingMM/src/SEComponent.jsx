@@ -34,16 +34,16 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      // Adjust node positions based on the increased gap
+      //Calculate the porsition for each node within the image
       nodes.forEach(node => {
         const nodeRow = Math.floor(node.id / cols);
         const nodeCol = node.id % cols;
-        node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
-        node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
+        node.x = nodeCol * gap + gap / 2; // Calculate X position
+        node.y = nodeRow * gap + gap / 2; // Calculate Y position
       });
       
 
-      // Draw the links (lines)
+      // Draw the edges (lines)
       //added a class attribte and event handler for clicking to identify edge was clicked
       svg.selectAll(".edge")
         .data(links, d => d.id)
@@ -78,8 +78,8 @@ const SEComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLinks , se
             // If the node is the origin and selected, make it green
             return "green";
           } else if (isOrigin && !isSelected) {
-            // If the node is the origin but not selected, make it yellow
-            return "yellow";
+            // If the node is the origin but not selected, make it orange
+            return "orange";
           } else {
             // If the node is not the origin, keep it black
             return "black";

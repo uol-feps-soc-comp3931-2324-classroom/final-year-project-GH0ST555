@@ -316,6 +316,7 @@ export function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE
           }
         });
         
+        //Same process for the right side
         const connectedLinksR = getConnectedLinks(nodeId+cols, links);
         connectedLinksR.forEach(link => {
           const linkExistsInSelectedR = selectedLinks.some(selectedLink => selectedLink.id === link.id);
@@ -323,6 +324,9 @@ export function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE
            countr = countr + 1
           }
         });
+
+        //Only if all  the nodes and edges are within the subgraph, this section is executed.
+        //Adds the origin to the resulting graph
         if (add_flag === true  && count==4 && countr == 4) {
             erodedNodes.push(nodeId);
             erodedNodes.push(nodeId + cols);
@@ -338,7 +342,7 @@ export function dilation(rows,cols,selectedNodes,selectedLinks, nodes, links, SE
   //erosion followed by dilation results in opening
   //This function is for preset cases
   export function opening(rows,cols,selectedNodes,selectedLinks, nodes, links, SE){
-    
+    //Just call the erosion function first and use the nodes as the selected nodes in dilation
       const{erodedNodes,erodedLinks} = erosion(rows,cols,selectedNodes,selectedLinks, nodes, links, SE);
       const{dilatedNodes,dilatedLinks} = dilation(rows,cols,erodedNodes,erodedLinks,nodes,links,SE);
       return { resultNodes: dilatedNodes, resultLinks: dilatedLinks };

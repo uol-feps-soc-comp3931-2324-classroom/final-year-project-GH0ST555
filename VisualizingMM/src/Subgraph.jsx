@@ -34,15 +34,16 @@ const SubgraphComponent = ({ rows,cols, nodes, links,selectedNodes, selectedLink
         nodes.forEach(node => {
           const nodeRow = Math.floor(node.id / cols);
           const nodeCol = node.id % cols;
-          node.x = nodeCol * gap + gap / 2; // Adjust for horizontal position
-          node.y = nodeRow * gap + gap / 2; // Adjust for vertical position
+          node.x = nodeCol * gap + gap / 2; // Calclulate X position
+          node.y = nodeRow * gap + gap / 2; // Calculate Y position
         });
 
       // Fallback to an empty array if selectedLinks or selectedNodes is null
+      //This prevents console errors
       const safeSelectedLinks = selectedLinks || [];
       const safeSelectedNodes = selectedNodes || [];
 
-      // Draw the links (lines)
+      // Draw the edges (lines)
       svg.selectAll(".edge")
           .data(links)
           .enter()
