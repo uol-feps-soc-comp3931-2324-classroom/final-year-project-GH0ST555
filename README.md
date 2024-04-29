@@ -23,3 +23,7 @@ Server running on port 3001
   ➜  Network: use --host to expose
   ➜  press h + enter to show help
 Now click on the url that is shown next to Local. and the application is now live.
+
+To run unit tests:
+In the server directory, type "npm test"
+For more verbose output: "npm test --verbose"
